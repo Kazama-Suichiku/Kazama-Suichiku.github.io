@@ -44,11 +44,11 @@ function updateAvatarDisplay() {
     console.log('updateAvatarDisplay: currentUser=', currentUser, 'userAvatar=', userAvatar ? userAvatar.substring(0, 50) : null);
     if (currentUser && userAvatar && userAvatar.startsWith('data:image/')) {
         avatarUpload.style.display = 'block';
+        avatarImg.src = ''; // 清理旧 src
         avatarImg.src = userAvatar;
         console.log('设置头像 src:', userAvatar.substring(0, 50));
-        // 验证图片加载
         avatarImg.onload = () => console.log('头像加载成功');
-        avatarImg.onerror = () => console.error('头像加载失败');
+        avatarImg.onerror = () => console.error('头像加载失败，src:', userAvatar.substring(0, 50));
     } else {
         avatarUpload.style.display = currentUser ? 'block' : 'none';
         avatarImg.src = '';
@@ -120,8 +120,8 @@ function updateSyncStatus() {
     status.textContent = `实时同步中`;
 }
 
-// 压缩图片（与文章一致）
-function compressImage(file, maxSize = 200, quality = 0.8) {
+// 压缩图片
+function compressImage(file, maxSize = 150, quality = 0.7) {
     return new Promise((resolve, reject) => {
         if (!file.type.match(/image\/(jpeg|png)/)) {
             reject(new Error('仅支持 JPEG 或 PNG 图片'));
@@ -149,8 +149,10 @@ function compressImage(file, maxSize = 200, quality = 0.8) {
                 ctx.drawImage(img, 0, 0, width, height);
                 const compressed = canvas.toDataURL('image/jpeg', quality);
                 console.log('压缩后:', compressed.substring(0, 50), '长度:', compressed.length);
-                if (compressed.length < 100) {
-                    reject(new Error('压缩失败，数据过小'));
+                if (compressed.length < 100 || !compressed.startsWith('data:image/jpeg;base64,')) {
+                    reject(new Error('压缩失败，无效数据'));
+                } else if (compressed.length > 500000) {
+                    reject(new Error('压缩后图片过大，请选择更小图片'));
                 } else {
                     resolve(compressed);
                 }
@@ -350,7 +352,7 @@ function showHome() {
     `;
     updateSyncStatus();
     const categoryFilter = content.querySelector('#categoryFilter');
-    const searchInput = document.querySelector('#searchInput');
+    const searchInput = content.querySelector('#searchInput');
     let currentPage = 1;
     function updateArticles(page = 1) {
         currentPage = page;
@@ -641,11 +643,13 @@ function initAuth() {
                 console.error('加载头像失败:', error);
                 showNotification('加载头像失败');
             });
-            userRef.update({
-                email: user.email,
-                role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            }).catch(error => console.error('更新用户数据失败:', error));
+            setTimeout(() => {
+                userRef.update({
+                    email: user.email,
+                    role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                }).catch(error => console.error('更新用户数据失败:', error));
+            }, 1000);
         } else {
             updateAvatarDisplay();
         }
@@ -658,6 +662,7 @@ function initAuth() {
     const loginForm = document.getElementById('loginForm');
     loginLink.addEventListener('click', (e) => {
         e.preventDefault();
+        console.log('点击登录链接');
         loginModal.style.display = 'flex';
     });
     loginModal.querySelector('.close').addEventListener('click', () => {
@@ -667,6 +672,7 @@ function initAuth() {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
+        console.log('登录尝试:', email);
         try {
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             if (!userCredential.user.emailVerified && email !== ADMIN_EMAIL) {
@@ -678,7 +684,12 @@ function initAuth() {
             loginModal.style.display = 'none';
             loginForm.reset();
         } catch (error) {
-            showNotification(`登录失败: ${error.message}`);
+            console.error('登录失败:', error.code, error.message);
+            let message = '登录失败';
+            if (error.code === 'auth/user-not-found') message = '用户不存在';
+            else if (error.code === 'auth/wrong-password') message = '密码错误';
+            else if (error.code === 'auth/invalid-email') message = '邮箱格式错误';
+            showNotification(`${message}: ${error.message}`);
         }
     });
 
@@ -687,6 +698,7 @@ function initAuth() {
     const registerForm = document.getElementById('registerForm');
     registerLink.addEventListener('click', (e) => {
         e.preventDefault();
+        console.log('点击注册链接');
         registerModal.style.display = 'flex';
     });
     registerModal.querySelector('.close').addEventListener('click', () => {
@@ -696,25 +708,37 @@ function initAuth() {
         e.preventDefault();
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
+        console.log('注册尝试:', email);
+        if (password.length < 6) {
+            showNotification('密码需至少6位！');
+            return;
+        }
         try {
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            console.log('注册成功，UID:', userCredential.user.uid);
             await userCredential.user.sendEmailVerification();
             showNotification('注册成功！请检查邮箱验证链接', 'success');
             registerModal.style.display = 'none';
             registerForm.reset();
-            await auth.signOut();
         } catch (error) {
-            showNotification(`注册失败: ${error.message}`);
+            console.error('注册失败:', error.code, error.message);
+            let message = '注册失败';
+            if (error.code === 'auth/email-already-in-use') message = '邮箱已注册';
+            else if (error.code === 'auth/invalid-email') message = '邮箱格式错误';
+            else if (error.code === 'auth/weak-password') message = '密码太弱';
+            showNotification(`${message}: ${error.message}`);
         }
     });
 
     const logoutLink = document.getElementById('logoutLink');
     logoutLink.addEventListener('click', async (e) => {
         e.preventDefault();
+        console.log('点击登出');
         try {
             await auth.signOut();
             showNotification('已登出！', 'success');
         } catch (error) {
+            console.error('登出失败:', error);
             showNotification(`登出失败: ${error.message}`);
         }
     });
@@ -737,11 +761,13 @@ function initAuth() {
             }
             try {
                 const compressed = await compressImage(file);
-                avatarPreview.src = compressed;
-                avatarPreview.style.display = 'block';
-                console.log('预览:', compressed.substring(0, 50));
-                avatarPreview.onload = () => console.log('预览加载成功');
-                avatarPreview.onerror = () => console.error('预览加载失败');
+                setTimeout(() => {
+                    avatarPreview.src = compressed;
+                    avatarPreview.style.display = 'block';
+                    console.log('预览:', compressed.substring(0, 50));
+                    avatarPreview.onload = () => console.log('预览加载成功');
+                    avatarPreview.onerror = () => console.error('预览加载失败，src:', compressed.substring(0, 50));
+                }, 0);
             } catch (error) {
                 console.error('预览失败:', error);
                 showNotification(`图片处理失败: ${error.message}`);
@@ -764,7 +790,6 @@ function initAuth() {
                 const compressed = await compressImage(file);
                 console.log('上传:', compressed.substring(0, 50));
                 await db.ref(`users/${currentUser.uid}`).update({ avatar: compressed });
-                // 验证数据库
                 const snapshot = await db.ref(`users/${currentUser.uid}/avatar`).once('value');
                 const savedAvatar = snapshot.val();
                 console.log('数据库:', savedAvatar ? savedAvatar.substring(0, 50) : '无');
