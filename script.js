@@ -11,7 +11,12 @@ const firebaseConfig = {
 };
 
 // 初始化 Firebase
-firebase.initializeApp(firebaseConfig);
+try {
+    firebase.initializeApp(firebaseConfig);
+} catch (error) {
+    console.error('Firebase 初始化失败:', error);
+    showNotification('服务初始化失败，请稍后重试');
+}
 const db = firebase.database();
 const auth = firebase.auth();
 
@@ -44,7 +49,7 @@ function updateAvatarDisplay() {
     console.log('updateAvatarDisplay: currentUser=', currentUser, 'userAvatar=', userAvatar ? userAvatar.substring(0, 50) : null);
     if (currentUser && userAvatar && userAvatar.startsWith('data:image/')) {
         avatarUpload.style.display = 'block';
-        avatarImg.src = ''; // 清理旧 src
+        avatarImg.src = '';
         avatarImg.src = userAvatar;
         console.log('设置头像 src:', userAvatar.substring(0, 50));
         avatarImg.onload = () => console.log('头像加载成功');
@@ -121,41 +126,44 @@ function updateSyncStatus() {
 }
 
 // 压缩图片
-function compressImage(file, maxSize = 150, quality = 0.7) {
+function compressImage(file, isAvatar = true) {
     return new Promise((resolve, reject) => {
         if (!file.type.match(/image\/(jpeg|png)/)) {
             reject(new Error('仅支持 JPEG 或 PNG 图片'));
             return;
         }
-        console.log('压缩图片:', file.name, file.size);
-        const img = new Image();
+        if (isAvatar && file.size > 2 * 1024 * 1024) {
+            reject(new Error('头像图片需小于2MB！'));
+            return;
+        }
+        console.log(`${isAvatar ? '头像' : '文章'}图片:`, file.name, file.size);
+        const mimeType = file.type;
+        const maxSizePx = isAvatar ? 200 : Infinity;
+        const quality = isAvatar ? 0.8 : (mimeType === 'image/jpeg' ? 1.0 : undefined);
         const reader = new FileReader();
         reader.onload = (e) => {
+            const img = new Image();
             img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                if (width > height && width > maxSize) {
-                    height = Math.round((height * maxSize) / width);
-                    width = maxSize;
-                } else if (height > maxSize) {
-                    width = Math.round((width * maxSize) / height);
-                    height = maxSize;
+                if (isAvatar && (width > maxSizePx || height > maxSizePx)) {
+                    const ratio = Math.min(maxSizePx / width, maxSizePx / height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
                 }
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                const compressed = canvas.toDataURL('image/jpeg', quality);
-                console.log('压缩后:', compressed.substring(0, 50), '长度:', compressed.length);
-                if (compressed.length < 100 || !compressed.startsWith('data:image/jpeg;base64,')) {
+                const compressed = canvas.toDataURL(mimeType, quality);
+                console.log(`${isAvatar ? '头像' : '文章'}压缩后:`, compressed.substring(0, 50), '长度:', compressed.length);
+                if (compressed.length < 100) {
                     reject(new Error('压缩失败，无效数据'));
-                } else if (compressed.length > 500000) {
-                    reject(new Error('压缩后图片过大，请选择更小图片'));
-                } else {
-                    resolve(compressed);
+                    return;
                 }
+                resolve(compressed);
             };
             img.onerror = () => reject(new Error('图片加载失败'));
         };
@@ -272,17 +280,24 @@ async function showEditForm(articleId) {
             this.value = '';
             return;
         }
+        preview.innerHTML = (article.images || []).map((img, index) => `
+            <div class="image-container">
+                <img src="${img}" alt="预览">
+                <button class="delete-image" data-index="${index}">×</button>
+            </div>
+        `).join('');
         for (let file of files) {
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('每张图片需小于2MB！');
-                continue;
+            try {
+                const compressed = await compressImage(file, false);
+                const container = document.createElement('div');
+                container.className = 'image-container';
+                container.innerHTML = `<img src="${compressed}" alt="预览">`;
+                preview.appendChild(container);
+                container.querySelector('img').addEventListener('click', () => showImageModal(compressed));
+            } catch (error) {
+                console.error('文章图片预览失败:', error);
+                showNotification(`图片处理失败: ${error.message}`);
             }
-            const compressed = await compressImage(file);
-            const container = document.createElement('div');
-            container.className = 'image-container';
-            container.innerHTML = `<img src="${compressed}" alt="预览">`;
-            preview.appendChild(container);
-            container.querySelector('img').addEventListener('click', () => showImageModal(compressed));
         }
     });
     preview.addEventListener('click', function(e) {
@@ -307,11 +322,13 @@ async function showEditForm(articleId) {
         let updatedImages = [...(article.images || [])];
         if (newImages.length) {
             const imagePromises = newImages.map(async file => {
-                if (file.size > 2 * 1024 * 1024) {
-                    showNotification('每张图片需小于2MB！');
+                try {
+                    return await compressImage(file, false);
+                } catch (error) {
+                    console.error('文章图片上传失败:', error);
+                    showNotification(`图片处理失败: ${error.message}`);
                     return null;
                 }
-                return await compressImage(file);
             });
             const results = await Promise.all(imagePromises);
             updatedImages = updatedImages.concat(results.filter(r => r));
@@ -347,7 +364,7 @@ function showHome() {
                 <div class="image-preview" id="imagePreview"></div>
                 <button type="submit">发布文章</button>
             </form>
-        ` : ''}
+        ` : '<p>请登录以发布文章</p>'}
         <div class="article-list"></div>
     `;
     updateSyncStatus();
@@ -427,16 +444,17 @@ function showHome() {
                     return;
                 }
                 for (let file of files) {
-                    if (file.size > 2 * 1024 * 1024) {
-                        showNotification('每张图片需小于2MB！');
-                        continue;
+                    try {
+                        const compressed = await compressImage(file, false);
+                        const container = document.createElement('div');
+                        container.className = 'image-container';
+                        container.innerHTML = `<img src="${compressed}" alt="预览">`;
+                        preview.appendChild(container);
+                        container.querySelector('img').addEventListener('click', () => showImageModal(compressed));
+                    } catch (error) {
+                        console.error('文章图片预览失败:', error);
+                        showNotification(`图片处理失败: ${error.message}`);
                     }
-                    const compressed = await compressImage(file);
-                    const container = document.createElement('div');
-                    container.className = 'image-container';
-                    container.innerHTML = `<img src="${compressed}" alt="预览">`;
-                    preview.appendChild(container);
-                    container.querySelector('img').addEventListener('click', () => showImageModal(compressed));
                 }
             });
             const form = content.querySelector('#newArticleForm');
@@ -452,27 +470,24 @@ function showHome() {
                     showNotification('最多上传5张图片！');
                     return;
                 }
+                let images = [];
                 if (files.length) {
                     const imagePromises = files.map(async file => {
-                        if (file.size > 2 * 1024 * 1024) {
-                            showNotification('每张图片需小于2MB！');
+                        try {
+                            return await compressImage(file, false);
+                        } catch (error) {
+                            console.error('文章图片上传失败:', error);
+                            showNotification(`图片处理失败: ${error.message}`);
                             return null;
                         }
-                        return await compressImage(file);
                     });
-                    const images = (await Promise.all(imagePromises)).filter(i => i);
-                    articles.push({ id: String(id), title, content, date, images, category });
-                    await saveData();
-                    form.reset();
-                    preview.innerHTML = '';
-                    showHome();
-                } else {
-                    articles.push({ id: String(id), title, content, date, images: [], category });
-                    await saveData();
-                    form.reset();
-                    preview.innerHTML = '';
-                    showHome();
+                    images = (await Promise.all(imagePromises)).filter(i => i);
                 }
+                articles.push({ id: String(id), title, content, date, images, category });
+                await saveData();
+                form.reset();
+                preview.innerHTML = '';
+                showHome();
             });
         }
     }
@@ -629,7 +644,7 @@ function router() {
 // 认证初始化
 function initAuth() {
     auth.onAuthStateChanged(user => {
-        console.log('认证状态:', user ? `UID: ${user.uid}` : '未登录');
+        console.log('认证状态:', user ? `UID: ${user.uid}, Email: ${user.email}` : '未登录');
         currentUser = user;
         userAvatar = null;
         if (user) {
@@ -675,6 +690,7 @@ function initAuth() {
         console.log('登录尝试:', email);
         try {
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            console.log('登录成功，UID:', userCredential.user.uid);
             if (!userCredential.user.emailVerified && email !== ADMIN_EMAIL) {
                 await auth.signOut();
                 showNotification('请先验证邮箱！');
@@ -689,6 +705,10 @@ function initAuth() {
             if (error.code === 'auth/user-not-found') message = '用户不存在';
             else if (error.code === 'auth/wrong-password') message = '密码错误';
             else if (error.code === 'auth/invalid-email') message = '邮箱格式错误';
+            else if (error.code === 'auth/network-request-failed') message = '网络请求失败，请检查网络';
+            else if (error.code === 'auth/too-many-requests') message = '尝试次数过多，请稍后重试';
+            else if (error.code === 'auth/invalid-credential') message = '无效的凭据，请检查邮箱和密码';
+            else if (error.code === 'auth/user-disabled') message = '账户已被禁用';
             showNotification(`${message}: ${error.message}`);
         }
     });
@@ -726,6 +746,7 @@ function initAuth() {
             if (error.code === 'auth/email-already-in-use') message = '邮箱已注册';
             else if (error.code === 'auth/invalid-email') message = '邮箱格式错误';
             else if (error.code === 'auth/weak-password') message = '密码太弱';
+            else if (error.code === 'auth/network-request-failed') message = '网络请求失败，请检查网络';
             showNotification(`${message}: ${error.message}`);
         }
     });
@@ -750,27 +771,22 @@ function initAuth() {
     if (avatarInput && avatarPreview && uploadAvatarButton) {
         avatarInput.addEventListener('change', async () => {
             const file = avatarInput.files[0];
-            console.log('选择图片:', file ? file.name : '无文件');
+            console.log('选择头像:', file ? file.name : '无文件');
             avatarPreview.style.display = 'none';
             avatarPreview.src = '';
             if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('图片需小于2MB！');
-                avatarInput.value = '';
-                return;
-            }
             try {
-                const compressed = await compressImage(file);
+                const compressed = await compressImage(file, true);
                 setTimeout(() => {
                     avatarPreview.src = compressed;
                     avatarPreview.style.display = 'block';
-                    console.log('预览:', compressed.substring(0, 50));
-                    avatarPreview.onload = () => console.log('预览加载成功');
-                    avatarPreview.onerror = () => console.error('预览加载失败，src:', compressed.substring(0, 50));
+                    console.log('头像预览:', compressed.substring(0, 50));
+                    avatarPreview.onload = () => console.log('头像预览加载成功');
+                    avatarPreview.onerror = () => console.error('头像预览加载失败，src:', compressed.substring(0, 50));
                 }, 0);
             } catch (error) {
-                console.error('预览失败:', error);
-                showNotification(`图片处理失败: ${error.message}`);
+                console.error('头像预览失败:', error);
+                showNotification(`头像处理失败: ${error.message}`);
                 avatarInput.value = '';
             }
         });
@@ -781,30 +797,30 @@ function initAuth() {
             }
             const file = avatarInput.files[0];
             if (!file) {
-                showNotification('请选择图片！');
+                showNotification('请选择头像图片！');
                 return;
             }
             uploadAvatarButton.disabled = true;
-            showNotification('正在上传...', 'success');
+            showNotification('正在上传头像...', 'success');
             try {
-                const compressed = await compressImage(file);
-                console.log('上传:', compressed.substring(0, 50));
+                const compressed = await compressImage(file, true);
+                console.log('上传头像:', compressed.substring(0, 50));
                 await db.ref(`users/${currentUser.uid}`).update({ avatar: compressed });
                 const snapshot = await db.ref(`users/${currentUser.uid}/avatar`).once('value');
                 const savedAvatar = snapshot.val();
-                console.log('数据库:', savedAvatar ? savedAvatar.substring(0, 50) : '无');
+                console.log('数据库头像:', savedAvatar ? savedAvatar.substring(0, 50) : '无');
                 if (!savedAvatar || !savedAvatar.startsWith('data:image/')) {
-                    throw new Error('数据库保存失败');
+                    throw new Error('头像保存失败');
                 }
                 userAvatar = compressed;
                 updateAvatarDisplay();
-                showNotification('上传成功！', 'success');
+                showNotification('头像上传成功！', 'success');
                 avatarInput.value = '';
                 avatarPreview.src = '';
                 avatarPreview.style.display = 'none';
             } catch (error) {
-                console.error('上传失败:', error);
-                showNotification(`上传失败: ${error.message}`);
+                console.error('头像上传失败:', error);
+                showNotification(`头像上传失败: ${error.message}`);
             } finally {
                 uploadAvatarButton.disabled = false;
             }
