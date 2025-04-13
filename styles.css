@@ -69,12 +69,14 @@ nav ul li a.active {
 .profile .avatar {
     width: 100px;
     height: 100px;
-    background: linear-gradient(45deg, #2a9d8f, #8ecae6);
-    background-size: cover;
-    background-position: center;
     border-radius: 50%;
     margin: 0 auto 10px;
-    overflow: hidden; /* 防止图片溢出 */
+    display: block;
+    object-fit: cover;
+}
+
+.profile .avatar[src=""] {
+    background: linear-gradient(45deg, #2a9d8f, #8ecae6);
 }
 
 .profile h2 {
@@ -102,11 +104,9 @@ nav ul li a.active {
     height: 100px;
     margin: 0 auto 10px;
     border-radius: 50%;
-    background-size: cover;
-    background-position: center;
-    border: 1px solid #ddd; /* 边框帮助确认区域 */
+    border: 1px solid #ddd;
     display: none;
-    overflow: hidden;
+    object-fit: cover;
 }
 
 #uploadAvatarButton {

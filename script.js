@@ -39,24 +39,20 @@ function isAdmin(user) {
 
 // 更新侧边栏头像
 function updateAvatarDisplay() {
-    const avatarDiv = document.querySelector('.profile .avatar');
+    const avatarImg = document.querySelector('.profile .avatar');
     const avatarUpload = document.getElementById('avatarUpload');
     console.log('updateAvatarDisplay: currentUser=', currentUser, 'userAvatar=', userAvatar ? userAvatar.substring(0, 50) : null);
     if (currentUser && userAvatar && userAvatar.startsWith('data:image/')) {
         avatarUpload.style.display = 'block';
-        avatarDiv.style.backgroundImage = `url(${userAvatar})`;
-        avatarDiv.style.background = 'none';
-        console.log('设置头像:', userAvatar.substring(0, 50));
-        // 验证图片是否加载
-        const img = new Image();
-        img.src = userAvatar;
-        img.onload = () => console.log('头像图片加载成功');
-        img.onerror = () => console.error('头像图片加载失败');
+        avatarImg.src = userAvatar;
+        console.log('设置头像 src:', userAvatar.substring(0, 50));
+        // 验证图片加载
+        avatarImg.onload = () => console.log('头像加载成功');
+        avatarImg.onerror = () => console.error('头像加载失败');
     } else {
         avatarUpload.style.display = currentUser ? 'block' : 'none';
-        avatarDiv.style.backgroundImage = '';
-        avatarDiv.style.background = 'linear-gradient(45deg, #2a9d8f, #8ecae6)';
-        console.log(currentUser ? '无有效头像，使用渐变' : '未登录，隐藏上传区域');
+        avatarImg.src = '';
+        console.log(currentUser ? '无头像，使用渐变' : '未登录，隐藏上传区域');
     }
 }
 
@@ -124,7 +120,7 @@ function updateSyncStatus() {
     status.textContent = `实时同步中`;
 }
 
-// 压缩图片
+// 压缩图片（与文章一致）
 function compressImage(file, maxSize = 200, quality = 0.8) {
     return new Promise((resolve, reject) => {
         if (!file.type.match(/image\/(jpeg|png)/)) {
@@ -152,9 +148,9 @@ function compressImage(file, maxSize = 200, quality = 0.8) {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
                 const compressed = canvas.toDataURL('image/jpeg', quality);
-                console.log('压缩后大小:', compressed.length);
+                console.log('压缩后:', compressed.substring(0, 50), '长度:', compressed.length);
                 if (compressed.length < 100) {
-                    reject(new Error('压缩图片失败，数据过小'));
+                    reject(new Error('压缩失败，数据过小'));
                 } else {
                     resolve(compressed);
                 }
@@ -354,7 +350,7 @@ function showHome() {
     `;
     updateSyncStatus();
     const categoryFilter = content.querySelector('#categoryFilter');
-    const searchInput = content.querySelector('#searchInput');
+    const searchInput = document.querySelector('#searchInput');
     let currentPage = 1;
     function updateArticles(page = 1) {
         currentPage = page;
@@ -732,6 +728,7 @@ function initAuth() {
             const file = avatarInput.files[0];
             console.log('选择图片:', file ? file.name : '无文件');
             avatarPreview.style.display = 'none';
+            avatarPreview.src = '';
             if (!file) return;
             if (file.size > 2 * 1024 * 1024) {
                 showNotification('图片需小于2MB！');
@@ -740,15 +737,11 @@ function initAuth() {
             }
             try {
                 const compressed = await compressImage(file);
-                avatarPreview.style.backgroundImage = `url(${compressed})`;
-                avatarPreview.style.background = 'none';
+                avatarPreview.src = compressed;
                 avatarPreview.style.display = 'block';
                 console.log('预览:', compressed.substring(0, 50));
-                // 验证预览图片
-                const img = new Image();
-                img.src = compressed;
-                img.onload = () => console.log('预览图片加载成功');
-                img.onerror = () => console.error('预览图片加载失败');
+                avatarPreview.onload = () => console.log('预览加载成功');
+                avatarPreview.onerror = () => console.error('预览加载失败');
             } catch (error) {
                 console.error('预览失败:', error);
                 showNotification(`图片处理失败: ${error.message}`);
@@ -771,10 +764,10 @@ function initAuth() {
                 const compressed = await compressImage(file);
                 console.log('上传:', compressed.substring(0, 50));
                 await db.ref(`users/${currentUser.uid}`).update({ avatar: compressed });
-                // 验证数据库写入
+                // 验证数据库
                 const snapshot = await db.ref(`users/${currentUser.uid}/avatar`).once('value');
                 const savedAvatar = snapshot.val();
-                console.log('数据库头像:', savedAvatar ? savedAvatar.substring(0, 50) : '无');
+                console.log('数据库:', savedAvatar ? savedAvatar.substring(0, 50) : '无');
                 if (!savedAvatar || !savedAvatar.startsWith('data:image/')) {
                     throw new Error('数据库保存失败');
                 }
@@ -782,6 +775,7 @@ function initAuth() {
                 updateAvatarDisplay();
                 showNotification('上传成功！', 'success');
                 avatarInput.value = '';
+                avatarPreview.src = '';
                 avatarPreview.style.display = 'none';
             } catch (error) {
                 console.error('上传失败:', error);
