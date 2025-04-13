@@ -14,6 +14,9 @@
             <ul>
                 <li><a href="#home">首页</a></li>
                 <li><a href="#about">关于</a></li>
+                <li><a href="#" id="loginLink">登录</a></li>
+                <li><a href="#" id="registerLink">注册</a></li>
+                <li><a href="#" id="logoutLink" style="display: none;">登出</a></li>
             </ul>
         </nav>
     </header>
@@ -32,13 +35,38 @@
         </aside>
         <main id="content"></main>
     </div>
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>登录</h2>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="邮箱" required>
+                <input type="password" id="loginPassword" placeholder="密码" required>
+                <button type="submit">登录</button>
+            </form>
+        </div>
+    </div>
+    <!-- 注册模态框 -->
+    <div id="registerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>注册</h2>
+            <form id="registerForm">
+                <input type="email" id="registerEmail" placeholder="邮箱" required>
+                <input type="password" id="registerPassword" placeholder="密码" required>
+                <button type="submit">注册</button>
+            </form>
+        </div>
+    </div>
     <footer>
         <p>© 2023 简易博客. All rights reserved.</p>
     </footer>
     <button class="back-to-top">↑</button>
-    <!-- Firebase UMD SDK -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
