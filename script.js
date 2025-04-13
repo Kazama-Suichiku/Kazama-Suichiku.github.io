@@ -450,6 +450,9 @@ function showArticle(articleId) {
         return;
     }
     const content = document.getElementById('content');
+    // 将文章内容按换行符分割为段落
+    const paragraphs = article.content.split('\n').filter(p => p.trim() !== '');
+    const contentHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
     content.innerHTML = `
         <div class="article-page">
             <h1>${article.title}</h1>
@@ -462,7 +465,7 @@ function showArticle(articleId) {
                     <div class="counter">1/${article.images.length}</div>
                 </div>
             ` : ''}
-            <p>${article.content}</p>
+            <div class="article-content">${contentHtml}</div>
             <p>${article.date}</p>
             <div class="comments"></div>
             ${currentUser ? `
