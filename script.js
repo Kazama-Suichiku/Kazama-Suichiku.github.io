@@ -46,18 +46,12 @@ function isAdmin(user) {
 function updateAvatarDisplay() {
     const avatarImg = document.querySelector('.profile .avatar');
     const avatarUpload = document.getElementById('avatarUpload');
-    console.log('updateAvatarDisplay: currentUser=', currentUser, 'userAvatar=', userAvatar ? userAvatar.substring(0, 50) : null);
     if (currentUser && userAvatar && userAvatar.startsWith('data:image/')) {
         avatarUpload.style.display = 'block';
-        avatarImg.src = '';
         avatarImg.src = userAvatar;
-        console.log('设置头像 src:', userAvatar.substring(0, 50));
-        avatarImg.onload = () => console.log('头像加载成功');
-        avatarImg.onerror = () => console.error('头像加载失败，src:', userAvatar.substring(0, 50));
     } else {
         avatarUpload.style.display = currentUser ? 'block' : 'none';
         avatarImg.src = '';
-        console.log(currentUser ? '无头像，使用渐变' : '未登录，隐藏上传区域');
     }
 }
 
@@ -136,7 +130,6 @@ function compressImage(file, isAvatar = true) {
             reject(new Error('头像图片需小于2MB！'));
             return;
         }
-        console.log(`${isAvatar ? '头像' : '文章'}图片:`, file.name, file.size);
         const mimeType = file.type;
         const maxSizePx = isAvatar ? 200 : Infinity;
         const quality = isAvatar ? 0.8 : (mimeType === 'image/jpeg' ? 1.0 : undefined);
@@ -158,11 +151,6 @@ function compressImage(file, isAvatar = true) {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
                 const compressed = canvas.toDataURL(mimeType, quality);
-                console.log(`${isAvatar ? '头像' : '文章'}压缩后:`, compressed.substring(0, 50), '长度:', compressed.length);
-                if (compressed.length < 100) {
-                    reject(new Error('压缩失败，无效数据'));
-                    return;
-                }
                 resolve(compressed);
             };
             img.onerror = () => reject(new Error('图片加载失败'));
@@ -353,7 +341,7 @@ function showHome() {
             </select>
             <input type="text" id="searchInput" placeholder="搜索文章...">
         </div>
-        ${isAdmin(currentUser) ? `
+        ${currentUser && isAdmin(currentUser) ? `
             <form id="newArticleForm" class="new-article-form">
                 <input type="text" id="articleTitle" placeholder="文章标题" required>
                 <select id="articleCategory" required>
@@ -418,11 +406,11 @@ function showHome() {
             const page = parseInt(e.target.dataset.page);
             updateArticles(page);
         }
-        const target = e.target;
-        const articleId = target.getAttribute('data-id');
-        if (target.classList.contains('edit-button') && articleId) {
+        if (e.target.classList.contains('edit-button')) {
+            const articleId = e.target.dataset.id;
             showEditForm(articleId);
-        } else if (target.classList.contains('delete-button') && articleId) {
+        } else if (e.target.classList.contains('delete-button')) {
+            const articleId = e.target.dataset.id;
             if (confirm('确定删除此文章？')) {
                 articles = articles.filter(a => a.id !== articleId);
                 comments = comments.filter(c => c.articleId !== articleId);
@@ -431,7 +419,7 @@ function showHome() {
             }
         }
     });
-    if (isAdmin(currentUser)) {
+    if (currentUser && isAdmin(currentUser)) {
         const imageInput = content.querySelector('#articleImage');
         const preview = content.querySelector('#imagePreview');
         if (imageInput && preview) {
@@ -705,10 +693,7 @@ function initAuth() {
             if (error.code === 'auth/user-not-found') message = '用户不存在';
             else if (error.code === 'auth/wrong-password') message = '密码错误';
             else if (error.code === 'auth/invalid-email') message = '邮箱格式错误';
-            else if (error.code === 'auth/network-request-failed') message = '网络请求失败，请检查网络';
-            else if (error.code === 'auth/too-many-requests') message = '尝试次数过多，请稍后重试';
-            else if (error.code === 'auth/invalid-credential') message = '无效的凭据，请检查邮箱和密码';
-            else if (error.code === 'auth/user-disabled') message = '账户已被禁用';
+            else if (error.code === 'auth/network-request-failed') message = '网络请求失败，请检查网络或尝试VPN';
             showNotification(`${message}: ${error.message}`);
         }
     });
@@ -746,7 +731,6 @@ function initAuth() {
             if (error.code === 'auth/email-already-in-use') message = '邮箱已注册';
             else if (error.code === 'auth/invalid-email') message = '邮箱格式错误';
             else if (error.code === 'auth/weak-password') message = '密码太弱';
-            else if (error.code === 'auth/network-request-failed') message = '网络请求失败，请检查网络';
             showNotification(`${message}: ${error.message}`);
         }
     });
@@ -764,26 +748,17 @@ function initAuth() {
         }
     });
 
-    // 头像上传
     const avatarInput = document.getElementById('avatarInput');
     const avatarPreview = document.getElementById('avatarPreview');
     const uploadAvatarButton = document.getElementById('uploadAvatarButton');
     if (avatarInput && avatarPreview && uploadAvatarButton) {
         avatarInput.addEventListener('change', async () => {
             const file = avatarInput.files[0];
-            console.log('选择头像:', file ? file.name : '无文件');
-            avatarPreview.style.display = 'none';
-            avatarPreview.src = '';
             if (!file) return;
             try {
                 const compressed = await compressImage(file, true);
-                setTimeout(() => {
-                    avatarPreview.src = compressed;
-                    avatarPreview.style.display = 'block';
-                    console.log('头像预览:', compressed.substring(0, 50));
-                    avatarPreview.onload = () => console.log('头像预览加载成功');
-                    avatarPreview.onerror = () => console.error('头像预览加载失败，src:', compressed.substring(0, 50));
-                }, 0);
+                avatarPreview.src = compressed;
+                avatarPreview.style.display = 'block';
             } catch (error) {
                 console.error('头像预览失败:', error);
                 showNotification(`头像处理失败: ${error.message}`);
@@ -800,18 +775,9 @@ function initAuth() {
                 showNotification('请选择头像图片！');
                 return;
             }
-            uploadAvatarButton.disabled = true;
-            showNotification('正在上传头像...', 'success');
             try {
                 const compressed = await compressImage(file, true);
-                console.log('上传头像:', compressed.substring(0, 50));
                 await db.ref(`users/${currentUser.uid}`).update({ avatar: compressed });
-                const snapshot = await db.ref(`users/${currentUser.uid}/avatar`).once('value');
-                const savedAvatar = snapshot.val();
-                console.log('数据库头像:', savedAvatar ? savedAvatar.substring(0, 50) : '无');
-                if (!savedAvatar || !savedAvatar.startsWith('data:image/')) {
-                    throw new Error('头像保存失败');
-                }
                 userAvatar = compressed;
                 updateAvatarDisplay();
                 showNotification('头像上传成功！', 'success');
@@ -821,8 +787,6 @@ function initAuth() {
             } catch (error) {
                 console.error('头像上传失败:', error);
                 showNotification(`头像上传失败: ${error.message}`);
-            } finally {
-                uploadAvatarButton.disabled = false;
             }
         });
     }
