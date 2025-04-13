@@ -5,11 +5,14 @@ html, body {
     background-color: #f4f4f4;
     color: #333;
     min-width: 1200px; /* 固定页面最小宽度 */
+    width: 100%; /* 确保body覆盖整个视窗 */
     overflow-x: auto; /* 水平滚动 */
     overflow-y: auto; /* 垂直滚动 */
-    height: 100vh; /* 确保页面高度占满视窗 */
+    height: 100vh; /* 页面占满视窗高度 */
     font-size: 16px; /* 固定基础字体大小 */
     line-height: 1.5;
+    -webkit-text-size-adjust: 100%; /* 防止iOS缩放文字 */
+    -webkit-overflow-scrolling: touch; /* 优化移动端滚动体验 */
 }
 
 header {
