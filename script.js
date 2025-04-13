@@ -19,6 +19,7 @@ const auth = firebase.auth();
 let articles = [];
 let comments = [];
 let currentUser = null;
+let userAvatar = null;
 const categories = ['技术', '生活', '其他'];
 const ADMIN_EMAIL = '3196968430@qq.com';
 
@@ -36,6 +37,29 @@ function isAdmin(user) {
     return user && user.email === ADMIN_EMAIL;
 }
 
+// 更新侧边栏头像
+function updateAvatarDisplay() {
+    const avatarDiv = document.querySelector('.profile .avatar');
+    const avatarUpload = document.getElementById('avatarUpload');
+    console.log('updateAvatarDisplay: currentUser=', currentUser, 'userAvatar=', userAvatar ? userAvatar.substring(0, 50) : null);
+    if (currentUser && userAvatar && userAvatar.startsWith('data:image/')) {
+        avatarUpload.style.display = 'block';
+        avatarDiv.style.backgroundImage = `url(${userAvatar})`;
+        avatarDiv.style.background = 'none';
+        console.log('设置头像:', userAvatar.substring(0, 50));
+        // 验证图片是否加载
+        const img = new Image();
+        img.src = userAvatar;
+        img.onload = () => console.log('头像图片加载成功');
+        img.onerror = () => console.error('头像图片加载失败');
+    } else {
+        avatarUpload.style.display = currentUser ? 'block' : 'none';
+        avatarDiv.style.backgroundImage = '';
+        avatarDiv.style.background = 'linear-gradient(45deg, #2a9d8f, #8ecae6)';
+        console.log(currentUser ? '无有效头像，使用渐变' : '未登录，隐藏上传区域');
+    }
+}
+
 // 更新导航显示
 function updateNavDisplay() {
     const loginLink = document.getElementById('loginLink');
@@ -51,6 +75,7 @@ function updateNavDisplay() {
         logoutLink.style.display = 'none';
     }
     updateNav();
+    updateAvatarDisplay();
 }
 
 // 获取并监听数据
@@ -59,19 +84,19 @@ function listenData() {
         const data = snapshot.val() || { articles: [], comments: [] };
         articles = data.articles ? data.articles.map(a => ({
             ...a,
-            id: String(a.id) // 确保 ID 为字符串
+            id: String(a.id)
         })) : [];
         comments = data.comments ? data.comments.map(c => ({
             ...c,
             id: String(c.id),
             articleId: String(c.articleId)
         })) : [];
-        console.log('加载文章:', articles); // 调试：检查文章数据
+        console.log('加载文章:', articles.length);
         showHome();
         updateSyncStatus();
         showNotification('数据已同步！', 'success');
     }, (error) => {
-        console.error('Firebase 错误:', error);
+        console.error('加载文章失败:', error);
         showNotification(`同步失败: ${error.message}`);
         showHome();
     });
@@ -83,7 +108,7 @@ async function saveData() {
         await db.ref('blog').set({ articles, comments });
         showNotification('数据保存成功！', 'success');
     } catch (e) {
-        console.error('保存错误:', e);
+        console.error('保存文章失败:', e);
         showNotification(`保存失败: ${e.message}`);
     }
 }
@@ -100,8 +125,13 @@ function updateSyncStatus() {
 }
 
 // 压缩图片
-function compressImage(file, maxSize = 800, quality = 0.7) {
-    return new Promise((resolve) => {
+function compressImage(file, maxSize = 200, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        if (!file.type.match(/image\/(jpeg|png)/)) {
+            reject(new Error('仅支持 JPEG 或 PNG 图片'));
+            return;
+        }
+        console.log('压缩图片:', file.name, file.size);
         const img = new Image();
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -121,9 +151,17 @@ function compressImage(file, maxSize = 800, quality = 0.7) {
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', quality));
+                const compressed = canvas.toDataURL('image/jpeg', quality);
+                console.log('压缩后大小:', compressed.length);
+                if (compressed.length < 100) {
+                    reject(new Error('压缩图片失败，数据过小'));
+                } else {
+                    resolve(compressed);
+                }
             };
+            img.onerror = () => reject(new Error('图片加载失败'));
         };
+        reader.onerror = () => reject(new Error('文件读取失败'));
         reader.readAsDataURL(file);
     });
 }
@@ -445,17 +483,16 @@ function showHome() {
 
 // 文章页面
 function showArticle(articleId) {
-    console.log('尝试显示文章 ID:', articleId); // 调试：检查传入的 ID
+    console.log('显示文章 ID:', articleId);
     const article = articles.find(a => a.id === articleId);
     if (!article) {
-        console.warn('未找到文章:', articleId); // 调试：文章未找到
+        console.warn('文章未找到:', articleId);
         showHome();
         return;
     }
-    console.log('找到文章:', article); // 调试：确认文章数据
     const content = document.getElementById('content');
-    const paragraphs = article.content.split('\n').filter(p => p.trim() !== '');
-    const contentHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+    const paragraphs = article.content.split('\n').filter(p => p.trim());
+    const contentHtml = paragraphs.map(p => `<p>${p}</p>`).join('');
     content.innerHTML = `
         <div class="article-page">
             <h1>${article.title}</h1>
@@ -579,7 +616,7 @@ function updateNav() {
 // 路由
 function router() {
     const hash = window.location.hash;
-    console.log('当前路由:', hash); // 调试：检查路由变化
+    console.log('路由:', hash);
     if (hash.startsWith('#article/')) {
         const articleId = hash.split('/')[1];
         showArticle(articleId);
@@ -594,15 +631,29 @@ function router() {
 // 认证初始化
 function initAuth() {
     auth.onAuthStateChanged(user => {
+        console.log('认证状态:', user ? `UID: ${user.uid}` : '未登录');
         currentUser = user;
-        updateNavDisplay();
+        userAvatar = null;
         if (user) {
-            db.ref('users/' + user.uid).set({
+            const userRef = db.ref(`users/${user.uid}`);
+            userRef.on('value', (snapshot) => {
+                const userData = snapshot.val();
+                userAvatar = userData && userData.avatar && userData.avatar.startsWith('data:image/') ? userData.avatar : null;
+                console.log('用户数据:', userData);
+                updateAvatarDisplay();
+            }, (error) => {
+                console.error('加载头像失败:', error);
+                showNotification('加载头像失败');
+            });
+            userRef.update({
                 email: user.email,
                 role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
                 createdAt: firebase.database.ServerValue.TIMESTAMP
-            });
+            }).catch(error => console.error('更新用户数据失败:', error));
+        } else {
+            updateAvatarDisplay();
         }
+        updateNavDisplay();
         router();
     });
 
@@ -671,12 +722,81 @@ function initAuth() {
             showNotification(`登出失败: ${error.message}`);
         }
     });
+
+    // 头像上传
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const uploadAvatarButton = document.getElementById('uploadAvatarButton');
+    if (avatarInput && avatarPreview && uploadAvatarButton) {
+        avatarInput.addEventListener('change', async () => {
+            const file = avatarInput.files[0];
+            console.log('选择图片:', file ? file.name : '无文件');
+            avatarPreview.style.display = 'none';
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('图片需小于2MB！');
+                avatarInput.value = '';
+                return;
+            }
+            try {
+                const compressed = await compressImage(file);
+                avatarPreview.style.backgroundImage = `url(${compressed})`;
+                avatarPreview.style.background = 'none';
+                avatarPreview.style.display = 'block';
+                console.log('预览:', compressed.substring(0, 50));
+                // 验证预览图片
+                const img = new Image();
+                img.src = compressed;
+                img.onload = () => console.log('预览图片加载成功');
+                img.onerror = () => console.error('预览图片加载失败');
+            } catch (error) {
+                console.error('预览失败:', error);
+                showNotification(`图片处理失败: ${error.message}`);
+                avatarInput.value = '';
+            }
+        });
+        uploadAvatarButton.addEventListener('click', async () => {
+            if (!currentUser) {
+                showNotification('请先登录！');
+                return;
+            }
+            const file = avatarInput.files[0];
+            if (!file) {
+                showNotification('请选择图片！');
+                return;
+            }
+            uploadAvatarButton.disabled = true;
+            showNotification('正在上传...', 'success');
+            try {
+                const compressed = await compressImage(file);
+                console.log('上传:', compressed.substring(0, 50));
+                await db.ref(`users/${currentUser.uid}`).update({ avatar: compressed });
+                // 验证数据库写入
+                const snapshot = await db.ref(`users/${currentUser.uid}/avatar`).once('value');
+                const savedAvatar = snapshot.val();
+                console.log('数据库头像:', savedAvatar ? savedAvatar.substring(0, 50) : '无');
+                if (!savedAvatar || !savedAvatar.startsWith('data:image/')) {
+                    throw new Error('数据库保存失败');
+                }
+                userAvatar = compressed;
+                updateAvatarDisplay();
+                showNotification('上传成功！', 'success');
+                avatarInput.value = '';
+                avatarPreview.style.display = 'none';
+            } catch (error) {
+                console.error('上传失败:', error);
+                showNotification(`上传失败: ${error.message}`);
+            } finally {
+                uploadAvatarButton.disabled = false;
+            }
+        });
+    }
 }
 
 // 初始化
 window.addEventListener('hashchange', router);
 window.addEventListener('load', () => {
-    console.log('页面加载，初始化 Firebase...');
+    console.log('页面加载');
     listenData();
     initAuth();
     initBackToTop();

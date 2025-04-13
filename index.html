@@ -26,6 +26,11 @@
                 <div class="avatar"></div>
                 <h2>Kazama_Suichiku</h2>
                 <p>欢迎访问我的博客！我是一名游戏技术美术爱好者，我会在我的博客中分享我的学习历程和记录！！！希望我们都能学有所成！！</p>
+                <div id="avatarUpload" style="display: none;">
+                    <input type="file" id="avatarInput" accept="image/jpeg,image/png">
+                    <div id="avatarPreview" class="avatar-preview"></div>
+                    <button id="uploadAvatarButton">上传头像</button>
+                </div>
                 <div class="contact">
                     <h3>联系方式</h3>
                     <p><a href="https://www.zhihu.com/people/48-52-52-27-65" target="_blank"><span class="icon zhihu"></span> 知乎</a></p>
@@ -35,7 +40,6 @@
         </aside>
         <main id="content"></main>
     </div>
-    <!-- 登录模态框 -->
     <div id="loginModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close">×</span>
@@ -47,7 +51,6 @@
             </form>
         </div>
     </div>
-    <!-- 注册模态框 -->
     <div id="registerModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close">×</span>
@@ -63,7 +66,6 @@
         <p>© 2023 简易博客. All rights reserved.</p>
     </footer>
     <button class="back-to-top">↑</button>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
