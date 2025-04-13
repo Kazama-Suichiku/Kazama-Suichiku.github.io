@@ -1,9 +1,15 @@
-body {
-    font-family: 'Roboto', sans-serif;
+html, body {
     margin: 0;
     padding: 0;
+    font-family: 'Roboto', sans-serif;
     background-color: #f4f4f4;
     color: #333;
+    min-width: 1200px; /* 固定页面最小宽度 */
+    overflow-x: auto; /* 水平滚动 */
+    overflow-y: auto; /* 垂直滚动 */
+    height: 100vh; /* 确保页面高度占满视窗 */
+    font-size: 16px; /* 固定基础字体大小 */
+    line-height: 1.5;
 }
 
 header {
@@ -13,19 +19,23 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%; /* 全屏覆盖 */
+    box-sizing: border-box;
 }
 
 nav {
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .logo {
-    font-size: 1.5em;
+    font-size: 24px; /* 固定logo字体大小 */
     font-weight: bold;
 }
 
@@ -38,6 +48,7 @@ nav ul {
 }
 
 nav ul li a {
+    font-size: 16px; /* 固定导航文字大小 */
     color: white;
     text-decoration: none;
     padding: 10px;
@@ -52,22 +63,26 @@ nav ul li a.active {
 
 .container {
     max-width: 1200px;
+    width: 1200px; /* 固定宽度 */
     margin: 20px auto;
     display: flex;
     gap: 20px;
     padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .sidebar {
     flex: 1;
+    width: 280px; /* 固定侧边栏宽度 */
     background-color: white;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
 }
 
 .profile .avatar {
-    width: 100px;
+    width: 100px; /* 固定头像尺寸 */
     height: 100px;
     border-radius: 50%;
     margin: 0 auto 10px;
@@ -82,11 +97,13 @@ nav ul li a.active {
 .profile h2 {
     margin: 10px 0;
     text-align: center;
+    font-size: 20px; /* 固定标题大小 */
 }
 
 .profile p {
     margin: 10px 0;
     text-align: center;
+    font-size: 16px; /* 固定文字大小 */
 }
 
 #avatarUpload {
@@ -116,7 +133,7 @@ nav ul li a.active {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 14px; /* 固定按钮文字大小 */
 }
 
 #uploadAvatarButton:hover {
@@ -130,10 +147,12 @@ nav ul li a.active {
 
 .contact h3 {
     margin-top: 20px;
+    font-size: 18px; /* 固定标题大小 */
 }
 
 .contact p {
     margin: 5px 0;
+    font-size: 16px; /* 固定文字大小 */
 }
 
 .contact a {
@@ -147,10 +166,12 @@ nav ul li a.active {
 
 main {
     flex: 3;
+    width: 880px; /* 固定主内容宽度 */
     background-color: white;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
 }
 
 .filters {
@@ -164,7 +185,7 @@ main {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 1em;
+    font-size: 16px; /* 固定输入框文字大小 */
 }
 
 .new-article-form,
@@ -184,7 +205,7 @@ main {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 1em;
+    font-size: 16px; /* 固定表单文字大小 */
 }
 
 .new-article-form textarea,
@@ -201,7 +222,7 @@ main {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 16px; /* 固定按钮文字大小 */
 }
 
 .new-article-form button:hover,
@@ -220,7 +241,7 @@ main {
 }
 
 .image-container img {
-    max-width: 100px;
+    max-width: 100px; /* 固定预览图片宽度 */
     height: auto;
     border-radius: 5px;
 }
@@ -258,7 +279,7 @@ main {
 }
 
 .article img {
-    max-width: 150px;
+    width: 150px; /* 固定文章图片宽度 */
     height: auto;
     border-radius: 5px;
 }
@@ -269,7 +290,7 @@ main {
 
 .article h2 {
     margin: 0 0 10px;
-    font-size: 1.5em;
+    font-size: 20px; /* 固定文章标题大小 */
 }
 
 .article h2 a {
@@ -283,6 +304,7 @@ main {
 
 .article p {
     margin: 5px 0;
+    font-size: 16px; /* 固定文章文字大小 */
 }
 
 .article-actions {
@@ -295,6 +317,7 @@ main {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 14px; /* 固定按钮文字大小 */
 }
 
 .edit-button {
@@ -318,6 +341,7 @@ main {
 .empty {
     text-align: center;
     color: #777;
+    font-size: 16px; /* 固定文字大小 */
 }
 
 .pagination {
@@ -333,6 +357,7 @@ main {
     background-color: white;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 14px; /* 固定按钮文字大小 */
 }
 
 .pagination button.active,
@@ -354,6 +379,7 @@ main {
 .suggestion {
     padding: 10px;
     cursor: pointer;
+    font-size: 16px; /* 固定建议文字大小 */
 }
 
 .suggestion:hover {
@@ -405,6 +431,7 @@ mark {
     color: white;
     padding: 5px 10px;
     border-radius: 5px;
+    font-size: 14px; /* 固定计数器文字大小 */
 }
 
 .comments {
@@ -424,10 +451,12 @@ mark {
 
 .comment p {
     margin: 0;
+    font-size: 16px; /* 固定评论文字大小 */
 }
 
 .comment small {
     color: #777;
+    font-size: 14px; /* 固定小文字大小 */
 }
 
 .reply-button {
@@ -438,6 +467,7 @@ mark {
     border-radius: 5px;
     cursor: pointer;
     margin-top: 5px;
+    font-size: 14px; /* 固定按钮文字大小 */
 }
 
 .reply-button:hover {
@@ -456,6 +486,7 @@ mark {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    font-size: 16px; /* 固定表单文字大小 */
 }
 
 #commentForm textarea {
@@ -470,6 +501,7 @@ mark {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 16px; /* 固定按钮文字大小 */
 }
 
 #commentForm button:hover {
@@ -499,7 +531,7 @@ mark {
     top: 20px;
     right: 20px;
     color: white;
-    font-size: 2em;
+    font-size: 24px; /* 固定关闭按钮大小 */
     cursor: pointer;
 }
 
@@ -509,6 +541,9 @@ footer {
     background-color: #2a9d8f;
     color: white;
     margin-top: 20px;
+    width: 100%; /* 全屏覆盖 */
+    box-sizing: border-box;
+    font-size: 16px; /* 固定页脚文字大小 */
 }
 
 .back-to-top {
@@ -524,6 +559,7 @@ footer {
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.3s;
+    font-size: 20px; /* 固定按钮文字大小 */
 }
 
 .back-to-top.visible {
@@ -537,6 +573,7 @@ footer {
     padding: 10px 20px;
     border-radius: 5px;
     z-index: 1000;
+    font-size: 16px; /* 固定通知文字大小 */
 }
 
 .notification.error {
@@ -557,7 +594,7 @@ footer {
     color: white;
     padding: 5px 10px;
     border-radius: 5px;
-    font-size: 0.9em;
+    font-size: 14px; /* 固定状态文字大小 */
 }
 
 .modal {
@@ -584,13 +621,14 @@ footer {
 
 .modal-content h2 {
     margin-top: 0;
+    font-size: 20px; /* 固定模态框标题大小 */
 }
 
 .modal-content .close {
     position: absolute;
     top: 10px;
     right: 15px;
-    font-size: 1.5em;
+    font-size: 24px; /* 固定关闭按钮大小 */
     cursor: pointer;
 }
 
@@ -605,7 +643,7 @@ footer {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 1em;
+    font-size: 16px; /* 固定输入框和按钮文字大小 */
 }
 
 .modal-content button {
@@ -629,6 +667,7 @@ footer {
     margin: 0 0 1.2em 0;
     line-height: 1.6;
     text-align: justify;
+    font-size: 16px; /* 固定文章内容文字大小 */
 }
 
 .gallery {
@@ -637,8 +676,10 @@ footer {
 
 .article-page h1 {
     margin-bottom: 0.5em;
+    font-size: 24px; /* 固定文章标题大小 */
 }
 
 .article-page p:not(.article-content p) {
     margin: 0.5em 0;
+    font-size: 16px; /* 固定其他文字大小 */
 }
