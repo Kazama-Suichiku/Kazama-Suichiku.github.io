@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简易博客</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">博客</div>
+            <ul>
+                <li><a href="#home">首页</a></li>
+                <li><a href="#about">关于</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="profile">
+                <div class="avatar"></div>
+                <h2>张三</h2>
+                <p>欢迎访问我的博客！我是一个热爱分享知识的网页设计爱好者，喜欢探索前端技术和设计灵感。希望你在这里找到有趣的内容！</p>
+                <div class="contact">
+                    <h3>联系方式</h3>
+                    <p><a href="https://www.zhihu.com/people/48-52-52-27-65" target="_blank"><span class="icon zhihu"></span> 知乎</a></p>
+                    <p><a href="https://space.bilibili.com/56807642?spm_id_from=333.788.0.0" target="_blank"><span class="icon bilibili"></span> B站</a></p>
+                </div>
+            </div>
+        </aside>
+        <main id="content"></main>
+    </div>
+    <footer>
+        <p>© 2023 简易博客. All rights reserved.</p>
+    </footer>
+    <button class="back-to-top">↑</button>
+    <!-- Firebase UMD SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
