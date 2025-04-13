@@ -505,7 +505,7 @@ const firebaseConfig = {
       const content = document.getElementById('content');
       content.innerHTML = `
           <div class="about-page">
-              <h1>关于我们</h1>
+              <h1>关于我</h1>
               <p>欢迎访问我的博客！这是一个我的记录技术美术学习记录的博客平台，专注于分享有趣的内容和知识。</p>
               <p>在这里，你可以阅读文章、发表评论，并与社区互动。我会致力于提供一个干净、简洁的用户体验。</p>
               <p>联系我：fengzhongcuizhu@gmail.com</p>
