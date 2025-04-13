@@ -59,13 +59,14 @@ function listenData() {
         const data = snapshot.val() || { articles: [], comments: [] };
         articles = data.articles ? data.articles.map(a => ({
             ...a,
-            id: a.id.toString()
+            id: String(a.id) // 确保 ID 为字符串
         })) : [];
         comments = data.comments ? data.comments.map(c => ({
             ...c,
-            id: c.id.toString(),
-            articleId: c.articleId.toString()
+            id: String(c.id),
+            articleId: String(c.articleId)
         })) : [];
+        console.log('加载文章:', articles); // 调试：检查文章数据
         showHome();
         updateSyncStatus();
         showNotification('数据已同步！', 'success');
@@ -165,7 +166,7 @@ function renderArticles(filteredArticles, query = '', page = 1, perPage = 10) {
         articleDiv.innerHTML = `
             ${article.images && article.images[0] ? `<img src="${article.images[0]}" alt="文章图片">` : ''}
             <div class="content">
-                <h2><a href="#article/${article.id}">${highlightText(article.title, query)}</a></h2>
+                <h2><a href="#article/${article.id}" class="article-link" data-id="${article.id}">${highlightText(article.title, query)}</a></h2>
                 <p>${highlightText(summary, query)}</p>
                 <p>分类: ${article.category || '其他'} | ${article.date}</p>
                 ${isAdmin(currentUser) ? `
@@ -196,7 +197,7 @@ async function showEditForm(articleId) {
         showHome();
         return;
     }
-    const article = articles.find(a => a.id == articleId);
+    const article = articles.find(a => a.id === articleId);
     if (!article) {
         showHome();
         return;
@@ -280,7 +281,7 @@ async function showEditForm(articleId) {
             updatedImages = updatedImages.concat(results.filter(r => r));
         }
         articles = articles.map(a =>
-            a.id == articleId ? { id: a.id, title, content, date, images: updatedImages, category } : a
+            a.id === articleId ? { id: a.id, title, content, date, images: updatedImages, category } : a
         );
         await saveData();
         showHome();
@@ -370,8 +371,8 @@ function showHome() {
             showEditForm(articleId);
         } else if (target.classList.contains('delete-button') && articleId) {
             if (confirm('确定删除此文章？')) {
-                articles = articles.filter(a => a.id != articleId);
-                comments = comments.filter(c => c.articleId != articleId);
+                articles = articles.filter(a => a.id !== articleId);
+                comments = comments.filter(c => c.articleId !== articleId);
                 await saveData();
                 showHome();
             }
@@ -424,13 +425,13 @@ function showHome() {
                         return await compressImage(file);
                     });
                     const images = (await Promise.all(imagePromises)).filter(i => i);
-                    articles.push({ id, title, content, date, images, category });
+                    articles.push({ id: String(id), title, content, date, images, category });
                     await saveData();
                     form.reset();
                     preview.innerHTML = '';
                     showHome();
                 } else {
-                    articles.push({ id, title, content, date, images: [], category });
+                    articles.push({ id: String(id), title, content, date, images: [], category });
                     await saveData();
                     form.reset();
                     preview.innerHTML = '';
@@ -444,13 +445,15 @@ function showHome() {
 
 // 文章页面
 function showArticle(articleId) {
-    const article = articles.find(a => a.id == articleId);
+    console.log('尝试显示文章 ID:', articleId); // 调试：检查传入的 ID
+    const article = articles.find(a => a.id === articleId);
     if (!article) {
+        console.warn('未找到文章:', articleId); // 调试：文章未找到
         showHome();
         return;
     }
+    console.log('找到文章:', article); // 调试：确认文章数据
     const content = document.getElementById('content');
-    // 将文章内容按换行符分割为段落
     const paragraphs = article.content.split('\n').filter(p => p.trim() !== '');
     const contentHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
     content.innerHTML = `
@@ -497,7 +500,7 @@ function showArticle(articleId) {
         });
     }
     const commentsDiv = content.querySelector('.comments');
-    const articleComments = comments.filter(c => c.articleId == articleId);
+    const articleComments = comments.filter(c => c.articleId === articleId);
     function renderComments(parentId = null, container, level = 0) {
         const commentsToShow = articleComments.filter(c => c.parentId == parentId);
         commentsToShow.forEach(comment => {
@@ -533,7 +536,7 @@ function showArticle(articleId) {
                 const date = new Date().toISOString().split('T')[0];
                 const parentId = form.dataset.replyTo || null;
                 const commentId = comments.length ? Math.max(...comments.map(c => parseInt(c.id))) + 1 : 1;
-                comments.push({ id: commentId, articleId: articleId, name, comment: commentText, date, parentId });
+                comments.push({ id: String(commentId), articleId: articleId, name, comment: commentText, date, parentId });
                 await saveData();
                 delete form.dataset.replyTo;
                 form.querySelector('#comment').placeholder = '评论';
@@ -576,6 +579,7 @@ function updateNav() {
 // 路由
 function router() {
     const hash = window.location.hash;
+    console.log('当前路由:', hash); // 调试：检查路由变化
     if (hash.startsWith('#article/')) {
         const articleId = hash.split('/')[1];
         showArticle(articleId);
@@ -651,7 +655,7 @@ function initAuth() {
             showNotification('注册成功！请检查邮箱验证链接', 'success');
             registerModal.style.display = 'none';
             registerForm.reset();
-            await auth.signOut(); // 注册后自动登出，等待验证
+            await auth.signOut();
         } catch (error) {
             showNotification(`注册失败: ${error.message}`);
         }

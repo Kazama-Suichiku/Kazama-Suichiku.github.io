@@ -69,7 +69,7 @@ nav ul li a.active {
 .profile .avatar {
     width: 100px;
     height: 100px;
-    background-color: #ddd;
+    background: linear-gradient(45deg, #2a9d8f, #8ecae6); /* 青绿渐变 */
     border-radius: 50%;
     margin: 0 auto 10px;
 }
