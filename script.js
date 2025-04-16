@@ -1,17 +1,6 @@
-
-
 // --- 静态数据 ---
-let articles = [
-    { id: "10", title: "探索 Shading 的奥秘", content: "着色（Shading）是计算机图形学中的核心概念。\n它决定了物体表面如何与光线互动，从而呈现出不同的颜色、明暗和质感。\n本文将初步探讨一些基础的着色模型，如 Lambertian 和 Phong。", date: "2025-04-10", images: ["img/7df4fe39a2c75d40d2804681b099b22c.jpg"], category: "技术" },
-    { id: "11", title: "程序化生成纹理入门", content: "程序化纹理（Procedural Textures）是通过算法而不是手工绘制生成的图像。\n它们具有无限分辨率、可参数化控制等优点。\n了解如何使用噪声函数（如 Perlin Noise）是入门的关键。", date: "2025-04-11", images: ["img/a979bd1cf40851c97003a892c132948e.jpg"], category: "技术" },
-    { id: "12", title: "春日午后的闲暇时光", content: "难得的一个晴朗周末，阳光正好。\n泡一杯清茶，坐在窗边，看光影移动，听鸟儿鸣叫。\n享受这份宁静与惬意。", date: "2025-04-12", images: ["img/b8d843824089837bc11227daa794e542.jpg"], category: "生活" },
-    { id: "13", title: "学习 Unreal Engine 5 的小笔记", content: "最近开始接触 UE5，被 Lumen 和 Nanite 技术所震撼。\nLumen 提供了令人惊叹的实时全局光照效果，而 Nanite 则让处理海量模型变得轻而易举。\n虽然学习曲线陡峭，但前景可期！", date: "2025-04-13", images: ["img/f88ee649b6cebd7619493372b274ddd8.jpg"], category: "技术" }
-];
-let comments = [
-    { id: "101", articleId: "10", name: "图形爱好者", comment: "Phong 模型确实很经典！", date: "2025-04-10", parentId: null },
-    { id: "102", articleId: "11", name: "程序美术", comment: "噪声函数是程序化的灵魂啊！", date: "2025-04-11", parentId: null },
-    { id: "103", articleId: "10", name: "我(模拟)", comment: "是的，理解这些基础对着色很有帮助。", date: "2025-04-11", parentId: "101" }
-];
+let articles = [];
+let comments = [];
 const categories = ['技术', '生活', '其他'];
 
 // --- 全局变量 ---
@@ -312,7 +301,7 @@ function initAvatarUpload() {
         }
     };
 
-    uploadButton.onclick = () => {
+    uploadButton.onclick = async () => {
         if (!previewedAvatarData) {
             showNotification('请先选择图片', 'error');
             return;
@@ -320,7 +309,7 @@ function initAvatarUpload() {
         try {
             localStorage.setItem('userAvatar', previewedAvatarData);
             profileAvatar.src = previewedAvatarData;
-            showNotification('头像更新成功', 'success');
+            await saveAvatarToFirebase(previewedAvatarData);
             avatarInput.value = '';
             avatarPreview.src = '';
             avatarPreview.style.display = 'none';
@@ -334,8 +323,9 @@ function initAvatarUpload() {
 
 // --- 文章和评论渲染 ---
 async function saveData() {
-    console.log("内存数据已更新:", { articles, comments });
-    showNotification('更改已在内存中更新（刷新后丢失）', 'info');
+    await db.ref('articles').set(Object.fromEntries(articles.map(a => [a.id, a])));
+    await db.ref('comments').set(Object.fromEntries(comments.map(c => [c.id, c])));
+    showNotification('更改已同步到云端', 'success');
 }
 
 function renderArticles(filteredArticles, query = '', page = 1, perPage = 5) {
@@ -359,15 +349,14 @@ function renderArticles(filteredArticles, query = '', page = 1, perPage = 5) {
         const summary = (article.content || '').replace(/\n/g, ' ').substring(0, 120) + ((article.content || '').length > 120 ? '...' : '');
         const imageSrc = (Array.isArray(article.images) && article.images[0]) ? article.images[0] : '';
         div.innerHTML = `
-            <img src="${imageSrc}" alt="${imageSrc ? (article.title || '文章') + ' 图片' : '无图片'}" ${imageSrc ? '' : 'style="display:none;"'} onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div style="display:${imageSrc ? 'none' : 'flex'}; width: 200px; height: 130px; background:#eee; align-items: center; justify-content:center; text-align:center; line-height:1.2; color:#aaa; font-size:12px; border-radius: 6px;">图片加载失败</div>
+            ${imageSrc ? `<img src="${imageSrc}" alt="${(article.title || '文章') + ' 图片'}" onerror="this.style.display='none';">` : ''}
+            <div style="display:none; width: 200px; height: 130px; background:#eee; align-items: center; justify-content:center; text-align:center; line-height:1.2; color:#aaa; font-size:12px; border-radius: 6px;">图片加载失败</div>
             <div class="content">
                 <h2><a href="#article/${article.id}" class="article-link" data-id="${article.id}">${highlightText(article.title || '无题', query)}</a></h2>
                 <p>${highlightText(summary, query)}</p>
                 <p>分类: ${article.category || '其他'} | 日期: ${article.date || '未知'}</p>
                 <div class="article-actions">
-                    <button class="edit-button" data-id="${article.id}" title="编辑文章">编辑</button>
-                    <button class="delete-button" data-id="${article.id}" title="删除文章">删除</button>
+                    ${isAdmin() ? `<button class="edit-button" data-id="${article.id}" title="编辑文章">编辑</button><button class="delete-button" data-id="${article.id}" title="删除文章">删除</button>` : ''}
                 </div>
             </div>`;
         articleList.appendChild(div);
@@ -411,6 +400,11 @@ function renderArticles(filteredArticles, query = '', page = 1, perPage = 5) {
 }
 
 async function showEditForm(articleId) {
+    if (!isAdmin()) {
+        showNotification('只有管理员可以编辑文章', 'error');
+        window.location.hash = '#home';
+        return;
+    }
     disconnectScrollAnimations();
     const article = articles.find(a => String(a.id) === String(articleId));
     if (!article) {
@@ -554,26 +548,7 @@ function showHome() {
             </select>
             <input type="text" id="searchInput" placeholder="搜索文章..." title="输入关键词搜索">
         </div>
-        <details class="new-article-toggle animate-on-scroll" style="animation-delay: 0.1s;">
-            <summary>发布新文章 »</summary>
-            <form id="newArticleForm" class="new-article-form" novalidate>
-                <label for="articleTitle">标题:</label>
-                <input type="text" id="articleTitle" required>
-                <label for="articleCategory">分类:</label>
-                <select id="articleCategory" required>
-                    <option value="" disabled selected>选择分类</option>
-                    ${categories.map(c => `<option value="${c}">${c}</option>`).join('')}
-                </select>
-                <label for="articleContent">内容:</label>
-                <textarea id="articleContent" required></textarea>
-                <label for="articleImage">图片（最多5张）:</label>
-                <input type="file" id="articleImage" accept="image/jpeg,image/png" multiple>
-                <div class="image-preview" id="imagePreview">
-                    <p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>
-                </div>
-                <button type="submit">发布文章</button>
-            </form>
-        </details>
+        <div id="adminNewArticleContainer"></div>
         <div class="article-list"></div>`;
     const categoryFilter = content.querySelector('#categoryFilter');
     const searchInput = content.querySelector('#searchInput');
@@ -622,79 +597,143 @@ function showHome() {
         };
     }
 
-    const newArticleForm = content.querySelector('#newArticleForm');
-    if (newArticleForm) {
-        const imageInput = newArticleForm.querySelector('#articleImage');
-        const previewContainer = newArticleForm.querySelector('#imagePreview');
-        let newArticleFiles = [];
-        if (imageInput && previewContainer) {
-            imageInput.onchange = async function() {
-                newArticleFiles = Array.from(this.files);
-                previewContainer.innerHTML = '';
-                if (newArticleFiles.length > 5) {
-                    showNotification('最多可上传5张图片', 'error');
-                    this.value = '';
-                    newArticleFiles = [];
-                    previewContainer.innerHTML = '<p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>';
-                    return;
-                }
-                if (newArticleFiles.length > 0) {
-                    for (const file of newArticleFiles) {
-                        try {
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.alt = "新图片预览";
-                                img.style.cssText = 'max-width:80px; max-height:80px; border-radius:4px; margin:5px;';
-                                previewContainer.appendChild(img);
-                            };
-                            reader.readAsDataURL(file);
-                        } catch (err) {
-                            console.error("预览生成错误:", err);
-                            showNotification(`无法预览图片 ${file.name}`, 'error');
-                        }
-                    }
-                } else {
-                    previewContainer.innerHTML = '<p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>';
-                }
-            };
-        }
-        newArticleForm.onsubmit = async function(e) {
-            e.preventDefault();
-            const titleInput = document.getElementById('articleTitle');
-            const categoryInput = document.getElementById('articleCategory');
-            const contentInput = document.getElementById('articleContent');
-            const title = titleInput ? titleInput.value.trim() : '';
-            const category = categoryInput ? categoryInput.value : '';
-            const text = contentInput ? contentInput.value.trim() : '';
-            if (!title || !category || !text) {
-                showNotification('请填写标题、分类和内容', 'error');
+    renderAdminNewArticle();
+    window.updateArticles(1);
+}
+
+function renderAdminNewArticle() {
+    const container = document.getElementById('adminNewArticleContainer');
+    if (!container) return;
+    if (isAdmin()) {
+        container.innerHTML = `<details class="new-article-toggle animate-on-scroll" style="animation-delay: 0.1s;">
+            <summary>发布新文章 »</summary>
+            <form id="newArticleForm" class="new-article-form" novalidate>
+                <label for="articleTitle">标题:</label>
+                <input type="text" id="articleTitle" required>
+                <label for="articleCategory">分类:</label>
+                <select id="articleCategory" required>
+                    <option value="" disabled selected>选择分类</option>
+                    ${categories.map(c => `<option value="${c}">${c}</option>`).join('')}
+                </select>
+                <label for="articleContent">内容:</label>
+                <textarea id="articleContent" required></textarea>
+                <label for="articleImage">图片（最多5张）:</label>
+                <input type="file" id="articleImage" accept="image/jpeg,image/png" multiple>
+                <div class="image-preview" id="imagePreview">
+                    <p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>
+                </div>
+                <button type="submit">发布文章</button>
+            </form>
+        </details>`;
+        bindNewArticleForm();
+    } else {
+        container.innerHTML = '';
+    }
+}
+
+function bindNewArticleForm() {
+    const newArticleForm = document.getElementById('newArticleForm');
+    if (!newArticleForm) return;
+    const imageInput = newArticleForm.querySelector('#articleImage');
+    const previewContainer = newArticleForm.querySelector('#imagePreview');
+    let newArticleFiles = [];
+    if (imageInput && previewContainer) {
+        imageInput.onchange = async function() {
+            newArticleFiles = Array.from(this.files);
+            previewContainer.innerHTML = '';
+            if (newArticleFiles.length > 5) {
+                showNotification('最多可上传5张图片', 'error');
+                this.value = '';
+                newArticleFiles = [];
+                previewContainer.innerHTML = '<p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>';
                 return;
             }
-            let compressedImages = [];
             if (newArticleFiles.length > 0) {
-                showNotification('正在处理图片...', 'info');
-                const promises = newArticleFiles.map(f => compressImage(f, false).catch(err => {
-                    showNotification(`图片${f.name}处理失败: ${err.message}`, 'error');
-                    return null;
-                }));
-                compressedImages = (await Promise.all(promises)).filter(i => i !== null);
-                newArticleFiles = [];
+                for (const file of newArticleFiles) {
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.alt = "新图片预览";
+                            img.style.cssText = 'max-width:80px; max-height:80px; border-radius:4px; margin:5px;';
+                            previewContainer.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    } catch (err) {
+                        showNotification(`无法预览图片 ${file.name}`, 'error');
+                    }
+                }
+            } else {
+                previewContainer.innerHTML = '<p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>';
             }
-            const date = new Date().toISOString().split('T')[0];
-            const newId = Date.now().toString();
-            articles.push({ id: newId, title, category, content: text, date, images: compressedImages });
-            await saveData();
-            newArticleForm.reset();
-            if (previewContainer) previewContainer.innerHTML = '<p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>';
-            const details = content.querySelector('.new-article-toggle');
-            if (details) details.open = false;
-            showNotification('文章发布成功', 'success');
-            window.updateArticles(1);
         };
     }
-    window.updateArticles(1);
+    newArticleForm.onsubmit = async function(e) {
+        e.preventDefault();
+        const titleInput = document.getElementById('articleTitle');
+        const categoryInput = document.getElementById('articleCategory');
+        const contentInput = document.getElementById('articleContent');
+        const title = titleInput ? titleInput.value.trim() : '';
+        const category = categoryInput ? categoryInput.value : '';
+        const text = contentInput ? contentInput.value.trim() : '';
+        if (!title || !category || !text) {
+            showNotification('请填写标题、分类和内容', 'error');
+            return;
+        }
+        let compressedImages = [];
+        if (newArticleFiles.length > 0) {
+            showNotification('正在处理图片...', 'info');
+            const promises = newArticleFiles.map(f => compressImage(f, false).catch(err => {
+                showNotification(`图片${f.name}处理失败: ${err.message}`, 'error');
+                return null;
+            }));
+            compressedImages = (await Promise.all(promises)).filter(i => i !== null);
+            newArticleFiles = [];
+        }
+        const date = new Date().toISOString().split('T')[0];
+        const newId = Date.now().toString();
+        articles.push({ id: newId, title, category, content: text, date, images: compressedImages });
+        await saveData();
+        newArticleForm.reset();
+        if (previewContainer) previewContainer.innerHTML = '<p style="color:#888;font-size:14px;width:100%;text-align:center;">选择图片后显示预览</p>';
+        const details = document.querySelector('.new-article-toggle');
+        if (details) details.open = false;
+        showNotification('文章发布成功', 'success');
+        window.updateArticles(1);
+    };
+}
+
+// === 评论渲染独立函数 ===
+function renderCommentsForArticle(articleId, parentId = null, level = 0, container = null) {
+    const MAX_NESTING_LEVEL = 3;
+    if (!container) container = document.querySelector('.comments');
+    if (!container) return;
+    // 渲染前清空内容，避免旧内容残留
+    if (level === 0) container.innerHTML = '';
+    const filteredComments = comments.filter(c => String(c.articleId) === String(articleId) && String(c.parentId) === String(parentId));
+    if (filteredComments.length === 0 && parentId === null && level === 0) {
+        container.innerHTML = '<p style="color:#888;font-size:14px;text-align:center;">暂无评论，快来发表第一条吧！</p>';
+        return;
+    }
+    filteredComments.forEach((comment, index) => {
+        const div = document.createElement('div');
+        div.className = 'comment animate-on-scroll';
+        div.style.marginLeft = `${level * 20}px`;
+        div.style.setProperty('--comment-index', index);
+        div.innerHTML = `
+            <p><strong>${comment.name || '匿名'}</strong>${comment.comment}</p>
+            <small>发表于 ${comment.date || '未知'}</small>
+            ${level < MAX_NESTING_LEVEL ? `<button class="reply-button" data-comment-id="${comment.id}" data-comment-name="${comment.name || '匿名'}" title="回复此评论">回复</button>` : ''}
+            ${isAdmin() ? `<button class="delete-comment-button" data-comment-id="${comment.id}" title="删除评论">删除</button>` : ''}
+            <div id="reply-form-container-${comment.id}" class="reply-form-container" style="display:none;"></div>`;
+        container.appendChild(div);
+        const replyContainer = div.querySelector(`#reply-form-container-${comment.id}`);
+        if (level < MAX_NESTING_LEVEL) {
+            renderCommentsForArticle(articleId, comment.id, level + 1, replyContainer);
+        }
+    });
+    initializeScrollAnimations();
 }
 
 async function showArticle(articleId) {
@@ -723,45 +762,25 @@ async function showArticle(articleId) {
             <div class="article-content animate-on-scroll" style="animation-delay:0.3s;">${contentHtml}</div>
             <hr>
             <h2>评论区</h2>
-            <div class="comments"></div>
+            <div class="comments"><p style="text-align:center;color:#888;font-size:14px;">评论加载中...</p></div>
             <form id="commentForm" novalidate class="animate-on-scroll" style="animation-delay:0.4s;">
                 <h3>发表评论</h3>
                 <label for="commentName">你的名字:</label>
                 <input type="text" id="commentName" placeholder="访客" required>
                 <label for="commentText">评论内容:</label>
                 <textarea id="commentText" placeholder="输入你的评论..." required></textarea>
+                <div class="char-count" id="commentCharCount">0/500</div>
                 <button type="submit">提交评论</button>
             </form>
         </div>`;
-
     // 初始化评论者名字
     const commentNameInput = content.querySelector('#commentName');
     try {
         const savedName = localStorage.getItem('commenterName');
         if (savedName && commentNameInput) commentNameInput.value = savedName;
     } catch (e) {}
-
     // 渲染评论
-    const commentsContainer = content.querySelector('.comments');
-    function renderComments(parentId = null, level = 0) {
-        const filteredComments = comments.filter(c => String(c.articleId) === String(articleId) && String(c.parentId) === String(parentId));
-        filteredComments.forEach((comment, index) => {
-            const div = document.createElement('div');
-            div.className = 'comment animate-on-scroll';
-            div.style.marginLeft = `${level * 20}px`;
-            div.style.setProperty('--comment-index', index);
-            div.innerHTML = `
-                <p><strong>${comment.name || '匿名'}</strong>${comment.comment}</p>
-                <small>发表于 ${comment.date || '未知'}</small>
-                <button class="reply-button" data-comment-id="${comment.id}" data-comment-name="${comment.name || '匿名'}" title="回复此评论">回复</button>
-                <button class="delete-comment-button" data-comment-id="${comment.id}" title="删除评论">删除</button>
-                <div id="reply-form-container-${comment.id}" class="reply-form-container" style="display:none;"></div>`;
-            commentsContainer.appendChild(div);
-            renderComments(comment.id, level + 1);
-        });
-    }
-    renderComments();
-
+    renderCommentsForArticle(articleId);
     // 图库导航
     const gallery = content.querySelector('.gallery');
     if (gallery && article.images.length > 1) {
@@ -771,13 +790,8 @@ async function showArticle(articleId) {
         const prevBtn = gallery.querySelector('.prev');
         const nextBtn = gallery.querySelector('.next');
         function updateGallery() {
-            img.src = article.images[currentIndex];
-            img.alt = `${article.title || '文章'} 图片${currentIndex + 1}`;
-            counter.textContent = `${currentIndex + 1}/${article.images.length}`;
-            img.onerror = () => {
-                img.alt = '图片加载失败';
-                img.style.display = 'none';
-            };
+            if (img) img.src = article.images[currentIndex];
+            if (counter) counter.textContent = `${currentIndex + 1}/${article.images.length}`;
         }
         if (prevBtn) prevBtn.onclick = () => {
             currentIndex = (currentIndex - 1 + article.images.length) % article.images.length;
@@ -789,7 +803,6 @@ async function showArticle(articleId) {
         };
         if (img) img.onclick = () => showImageModal(article.images[currentIndex]);
     }
-
     // 评论提交
     const commentForm = content.querySelector('#commentForm');
     if (commentForm) {
@@ -801,9 +814,14 @@ async function showArticle(articleId) {
                 showNotification('请填写名字和评论内容', 'error');
                 return;
             }
+            if (text.length > 500) {
+                showNotification('评论内容不能超过500字符', 'error');
+                return;
+            }
             const date = new Date().toISOString().split('T')[0];
             const commentId = Date.now().toString();
-            comments.push({ id: commentId, articleId: String(articleId), name, comment: text, date, parentId: null });
+            const newComment = { id: commentId, articleId: String(articleId), name, comment: text, date, parentId: null };
+            comments.push(newComment);
             try {
                 localStorage.setItem('commenterName', name);
             } catch (e) {}
@@ -811,7 +829,31 @@ async function showArticle(articleId) {
             showNotification('评论提交成功', 'success');
             commentForm.reset();
             commentNameInput.value = name;
+            // 关键：评论提交后刷新整个页面，确保comments数据同步
             showArticle(articleId);
+        };
+        // 实时字数统计
+        const commentTextArea = content.querySelector('#commentText');
+        const charCountDisplay = content.querySelector('#commentCharCount');
+        if (commentTextArea && charCountDisplay) {
+            commentTextArea.addEventListener('input', () => {
+                const count = commentTextArea.value.length;
+                charCountDisplay.textContent = `${count}/500`;
+                charCountDisplay.style.color = count > 500 ? '#d16060' : 'inherit';
+            });
+        }
+    }
+    // 登录状态检查
+    let canComment = !!currentUser;
+    if (!canComment) {
+        if (commentForm) commentForm.style.display = 'none';
+        const tips = document.createElement('div');
+        tips.className = 'comment-login-tips';
+        tips.innerHTML = '请先<a href="#" id="loginToComment">登录</a>后发表评论';
+        content.appendChild(tips);
+        content.querySelector('#loginToComment').onclick = (e) => {
+            e.preventDefault();
+            showAuthModal();
         };
     }
     initializeScrollAnimations();
@@ -924,6 +966,7 @@ function closeInlineReplyForm(formContainer = null) {
     currentOpenReplyForm = null;
 }
 
+// 修改 openInlineReplyForm，添加字数统计和字数限制
 function openInlineReplyForm(parentId, parentName, parentCommentElement) {
     closeInlineReplyForm();
     const containerId = `reply-form-container-${parentId}`;
@@ -945,6 +988,7 @@ function openInlineReplyForm(parentId, parentName, parentCommentElement) {
             <input type="text" id="inlineReplyName-${parentId}" value="${commenterName}" placeholder="访客" required>
             <label for="inlineReplyText-${parentId}">回复 @${parentName}:</label>
             <textarea id="inlineReplyText-${parentId}" placeholder="输入你的回复..." required></textarea>
+            <div class="char-count" id="replyCharCount-${parentId}">0/500</div>
             <div class="reply-form-actions">
                 <button type="submit" class="submit-reply">提交回复</button>
                 <button type="button" class="cancel-reply">取消</button>
@@ -953,9 +997,18 @@ function openInlineReplyForm(parentId, parentName, parentCommentElement) {
     container.style.display = 'block';
     currentOpenReplyForm = container;
     const textarea = container.querySelector('textarea');
-    if (textarea) textarea.focus();
+    const replyCharCount = container.querySelector(`#replyCharCount-${parentId}`);
+    if (textarea && replyCharCount) {
+        textarea.addEventListener('input', () => {
+            const count = textarea.value.length;
+            replyCharCount.textContent = `${count}/500`;
+            replyCharCount.style.color = count > 500 ? '#d16060' : 'inherit';
+        });
+        textarea.focus();
+    }
 }
 
+// 修改 handleInlineReplySubmit，添加字数限制
 async function handleInlineReplySubmit(formElement) {
     const parentId = formElement.dataset.parentId;
     const nameInput = formElement.querySelector('input[type="text"]');
@@ -969,6 +1022,10 @@ async function handleInlineReplySubmit(formElement) {
     const commentText = commentTextarea.value.trim();
     if (!name || !commentText) {
         showNotification('请填写名字和回复内容', 'error');
+        return;
+    }
+    if (commentText.length > 500) {
+        showNotification('回复内容不能超过500字符', 'error');
         return;
     }
     const date = new Date().toISOString().split('T')[0];
@@ -1050,7 +1107,197 @@ function initializeBackToTop() {
     };
 }
 
-// --- 初始化 ---
+// === Firebase 用户认证与数据同步 ===
+// firebase已在index.html初始化
+
+// 全局firebase引用
+const auth = firebase.auth();
+const db = firebase.database();
+
+// 用户状态
+let currentUser = null;
+
+// 弹窗登录/注册UI
+function showAuthModal() {
+    // 若已存在则显示
+    let modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        return;
+    }
+    modal = document.createElement('div');
+    modal.id = 'authModal';
+    modal.className = 'auth-modal';
+    modal.innerHTML = `
+      <div class="auth-modal-content">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">登录</button>
+          <button class="auth-tab" data-tab="register">注册</button>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <label>邮箱</label>
+          <input type="email" id="loginEmail" placeholder="请输入邮箱" required autocomplete="username">
+          <label>密码</label>
+          <input type="password" id="loginPassword" placeholder="请输入密码" required autocomplete="current-password">
+          <button type="submit">登录</button>
+        </form>
+        <form id="registerForm" class="auth-form" style="display:none;">
+          <label>邮箱</label>
+          <input type="email" id="registerEmail" placeholder="请输入邮箱" required autocomplete="username">
+          <label>密码</label>
+          <input type="password" id="registerPassword" placeholder="请输入密码" required autocomplete="new-password">
+          <button type="submit">注册</button>
+        </form>
+        <div id="authModalStatus" class="auth-modal-status"></div>
+        <button class="auth-modal-close" title="关闭">×</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    // 切换tab
+    const tabs = modal.querySelectorAll('.auth-tab');
+    const loginForm = modal.querySelector('#loginForm');
+    const registerForm = modal.querySelector('#registerForm');
+    tabs.forEach(tab => {
+      tab.onclick = () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        if (tab.dataset.tab === 'login') {
+          loginForm.style.display = '';
+          registerForm.style.display = 'none';
+        } else {
+          loginForm.style.display = 'none';
+          registerForm.style.display = '';
+        }
+      };
+    });
+    // 登录
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const email = modal.querySelector('#loginEmail').value.trim();
+      const pwd = modal.querySelector('#loginPassword').value;
+      try {
+        await auth.signInWithEmailAndPassword(email, pwd);
+        closeAuthModal();
+      } catch (e) {
+        setAuthModalStatus('登录失败: ' + (e.message || '未知错误'), 'error');
+      }
+    };
+    // 注册
+    registerForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const email = modal.querySelector('#registerEmail').value.trim();
+      const pwd = modal.querySelector('#registerPassword').value;
+      try {
+        await auth.createUserWithEmailAndPassword(email, pwd);
+        setAuthModalStatus('注册成功，已自动登录', 'success');
+        setTimeout(closeAuthModal, 800);
+      } catch (e) {
+        setAuthModalStatus('注册失败: ' + (e.message || '未知错误'), 'error');
+      }
+    };
+    // 关闭弹窗
+    modal.querySelector('.auth-modal-close').onclick = closeAuthModal;
+    modal.onclick = (e) => { if (e.target === modal) closeAuthModal(); };
+    document.addEventListener('keydown', escAuthModal, { once: true });
+}
+function closeAuthModal() {
+    const modal = document.getElementById('authModal');
+    if (modal) modal.remove();
+}
+function escAuthModal(e) {
+    if (e.key === 'Escape') closeAuthModal();
+}
+function setAuthModalStatus(msg, type) {
+    const status = document.getElementById('authModalStatus');
+    if (status) {
+        status.textContent = msg;
+        status.className = 'auth-modal-status ' + (type || '');
+    }
+}
+
+// 顶部导航栏登录状态UI
+function showAuthStatusInHeader() {
+    const nav = document.querySelector('header nav ul');
+    if (!nav) return;
+    let statusLi = document.getElementById('authStatusHeaderLi');
+    if (!statusLi) {
+        statusLi = document.createElement('li');
+        nav.appendChild(statusLi);
+    }
+    statusLi.id = 'authStatusHeaderLi';
+    statusLi.innerHTML = '';
+    if (currentUser) {
+        statusLi.innerHTML = `<span class="auth-header-status">已登录: <b>${currentUser.email}</b></span><button id="logoutBtnHeader" class="auth-header-logout-btn">登出</button>`;
+        document.getElementById('logoutBtnHeader').onclick = async () => { await auth.signOut(); };
+    } else {
+        statusLi.innerHTML = `<button id="openAuthModalBtnHeader" class="auth-header-open-btn">登录/注册</button>`;
+        document.getElementById('openAuthModalBtnHeader').onclick = showAuthModal;
+    }
+}
+
+// 监听登录状态
+function listenAuthState() {
+    auth.onAuthStateChanged(user => {
+        currentUser = user;
+        showAuthStatusInHeader();
+        if (user) loadAvatarFromFirebase();
+        if (window.location.hash === '' || window.location.hash === '#home') {
+            showHome();
+        }
+    });
+}
+
+// === firebase数据同步部分 ===
+// 监听文章和评论的实时变化
+function listenRealtimeData() {
+    db.ref('articles').on('value', snap => {
+        const val = snap.val();
+        articles = val ? Object.values(val) : [];
+        if (window.updateArticles) window.updateArticles(1);
+    });
+    db.ref('comments').on('value', snap => {
+        const val = snap.val();
+        comments = val ? Object.values(val) : [];
+        console.log('firebase comments监听回调触发，comments:', comments);
+        // 若在文章页，直接刷新整篇文章，保证评论区一定渲染
+        const hash = window.location.hash;
+        if (hash.startsWith('#article/')) {
+            const articleId = hash.replace('#article/', '');
+            showArticle(articleId);
+        }
+    });
+}
+
+// 保存文章和评论到firebase
+async function saveData() {
+    await db.ref('articles').set(Object.fromEntries(articles.map(a => [a.id, a])));
+    await db.ref('comments').set(Object.fromEntries(comments.map(c => [c.id, c])));
+    showNotification('更改已同步到云端', 'success');
+}
+
+// 头像上传到firebase（每个用户独立）
+async function saveAvatarToFirebase(base64) {
+    if (!currentUser) return;
+    await db.ref('avatars/' + currentUser.uid).set(base64);
+    showNotification('头像已同步到云端', 'success');
+}
+
+// 从firebase加载头像
+function loadAvatarFromFirebase() {
+    if (!currentUser) return;
+    db.ref('avatars/' + currentUser.uid).once('value').then(snap => {
+        const val = snap.val();
+        const profileAvatar = document.getElementById('profileAvatar');
+        if (val && profileAvatar) profileAvatar.src = val;
+    });
+}
+
+// 权限判断工具
+function isAdmin() {
+    return currentUser && currentUser.email === '3196968430@qq.com';
+}
+
+// 初始化时监听数据
 function initialize() {
     const yearSpan = document.getElementById('currentYear');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
@@ -1077,7 +1324,297 @@ function initialize() {
             if (articleId) window.location.hash = `#article/${articleId}`;
         }
     });
+
+    listenAuthState();
+    listenRealtimeData();
 }
 
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', initialize);
+
+// ======= 评论系统重写（本地存储版）=======
+// 评论数据结构：{id, articleId, parentId, name, content, date}
+function getLocalComments() {
+    try {
+        return JSON.parse(localStorage.getItem('localComments') || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+function saveLocalComments(comments) {
+    localStorage.setItem('localComments', JSON.stringify(comments));
+}
+
+// 渲染评论区
+function renderComments(articleId) {
+    const container = document.querySelector('.comments');
+    if (!container) return;
+    const allComments = getLocalComments().filter(c => String(c.articleId) === String(articleId));
+    container.innerHTML = '';
+    if (allComments.length === 0) {
+        container.innerHTML = '<p style="color:#888;font-size:14px;text-align:center;">暂无评论，快来发表第一条吧！</p>';
+        return;
+    }
+    renderCommentTree(allComments, null, 0, container, articleId);
+}
+
+function renderCommentTree(comments, parentId, level, container, articleId) {
+    if (level > 2) return; // 最多3级
+    comments.filter(c => c.parentId === parentId).forEach(comment => {
+        const div = document.createElement('div');
+        div.className = 'comment animate-on-scroll';
+        div.style.marginLeft = `${level * 20}px`;
+        div.innerHTML = `
+            <p><strong>${escapeHtml(comment.name)}</strong>${escapeHtml(comment.content)}</p>
+            <small>发表于 ${comment.date}</small>
+            <button class="reply-button" data-id="${comment.id}" data-name="${escapeHtml(comment.name)}">回复</button>
+            <button class="delete-comment-button" data-id="${comment.id}">删除</button>
+            <div class="reply-form-container" style="display:none;"></div>
+        `;
+        container.appendChild(div);
+        // 绑定回复按钮
+        div.querySelector('.reply-button').onclick = function() {
+            openReplyForm(articleId, comment.id, comment.name, div.querySelector('.reply-form-container'));
+        };
+        // 绑定删除按钮
+        div.querySelector('.delete-comment-button').onclick = function() {
+            if (confirm('确定删除此评论及其所有回复？')) {
+                deleteCommentAndReplies(comment.id, articleId);
+            }
+        };
+        // 渲染子评论
+        renderCommentTree(comments, comment.id, level + 1, container, articleId);
+    });
+}
+
+function openReplyForm(articleId, parentId, parentName, container) {
+    closeAllReplyForms();
+    container.style.display = 'block';
+    container.innerHTML = `
+        <form class="inline-reply-form">
+            <label>你的名字:</label>
+            <input type="text" name="name" placeholder="访客" required maxlength="20">
+            <label>回复 @${escapeHtml(parentName)}:</label>
+            <textarea name="content" placeholder="输入你的回复..." required maxlength="500"></textarea>
+            <div class="reply-form-actions">
+                <button type="submit" class="submit-reply">提交回复</button>
+                <button type="button" class="cancel-reply">取消</button>
+            </div>
+        </form>
+    `;
+    const form = container.querySelector('form');
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        const name = form.name.value.trim() || '访客';
+        const content = form.content.value.trim();
+        if (!content) return alert('回复内容不能为空');
+        addComment(articleId, parentId, name, content);
+        container.style.display = 'none';
+    };
+    form.querySelector('.cancel-reply').onclick = function() {
+        container.style.display = 'none';
+    };
+}
+function closeAllReplyForms() {
+    document.querySelectorAll('.reply-form-container').forEach(c => c.style.display = 'none');
+}
+
+function addComment(articleId, parentId, name, content) {
+    const comments = getLocalComments();
+    comments.push({
+        id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
+        articleId: String(articleId),
+        parentId: parentId || null,
+        name: name,
+        content: content,
+        date: new Date().toLocaleString('zh-CN', {hour12: false})
+    });
+    saveLocalComments(comments);
+    renderComments(articleId);
+}
+
+function deleteCommentAndReplies(commentId, articleId) {
+    let comments = getLocalComments();
+    // 递归删除所有子评论
+    function del(id) {
+        comments = comments.filter(c => c.id !== id);
+        getLocalComments().filter(c => c.parentId === id).forEach(child => del(child.id));
+    }
+    del(commentId);
+    saveLocalComments(comments);
+    renderComments(articleId);
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]));
+}
+
+// 渲染评论表单
+function renderCommentForm(articleId) {
+    const content = document.getElementById('content');
+    if (!content) return;
+    let form = content.querySelector('#commentForm');
+    if (!form) {
+        form = document.createElement('form');
+        form.id = 'commentForm';
+        form.className = 'animate-on-scroll';
+        form.innerHTML = `
+            <h3>发表评论</h3>
+            <label for="commentName">你的名字:</label>
+            <input type="text" id="commentName" placeholder="访客" maxlength="20">
+            <label for="commentText">评论内容:</label>
+            <textarea id="commentText" placeholder="输入你的评论..." required maxlength="500"></textarea>
+            <div class="char-count" id="commentCharCount">0/500</div>
+            <button type="submit">提交评论</button>
+        `;
+        content.appendChild(form);
+    }
+    // 字数统计
+    const textarea = form.querySelector('#commentText');
+    const charCount = form.querySelector('#commentCharCount');
+    textarea.oninput = function() {
+        charCount.textContent = `${textarea.value.length}/500`;
+        charCount.style.color = textarea.value.length > 500 ? '#d16060' : '';
+    };
+    // 提交
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        const name = form.querySelector('#commentName').value.trim() || '访客';
+        const content = textarea.value.trim();
+        if (!content) return alert('评论内容不能为空');
+        addComment(articleId, null, name, content);
+        textarea.value = '';
+        charCount.textContent = '0/500';
+    };
+}
+
+// 文章详情页集成评论区
+async function showArticle(articleId) {
+    disconnectScrollAnimations();
+    const article = articles.find(a => String(a.id) === String(articleId));
+    if (!article) {
+        showNotification('未找到文章', 'error');
+        window.location.hash = '#home';
+        return;
+    }
+    const content = document.getElementById('content');
+    if (!content) return;
+    const paragraphs = (article.content || '').split('\n').filter(p => p.trim().length > 0);
+    const contentHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+    content.innerHTML = `
+        <div class="article-page" data-article-id="${articleId}">
+            <h1 class="animate-on-scroll">${article.title || '无题'}</h1>
+            <p class="animate-on-scroll" style="animation-delay:0.1s;">分类: ${article.category || '未分类'} | 日期: ${article.date || '未知'}</p>
+            ${(Array.isArray(article.images) && article.images.length > 0) ? `
+                <div class="gallery animate-on-scroll" style="animation-delay:0.2s;">
+                    ${article.images.length > 1 ? '<button class="prev" title="上一张">◄</button>' : ''}
+                    <img src="${article.images[0]}" alt="${article.title || '文章'} 图片1" onerror="this.alt='图片加载失败';this.style.display='none';">
+                    ${article.images.length > 1 ? '<button class="next" title="下一张">►</button>' : ''}
+                    ${article.images.length > 1 ? `<div class="counter">1/${article.images.length}</div>` : ''}
+                </div>` : ''}
+            <div class="article-content animate-on-scroll" style="animation-delay:0.3s;">${contentHtml}</div>
+            <hr>
+            <h2>评论区</h2>
+            <div class="comments"><p style="text-align:center;color:#888;font-size:14px;">评论加载中...</p></div>
+            <form id="commentForm" novalidate class="animate-on-scroll" style="animation-delay:0.4s;">
+                <h3>发表评论</h3>
+                <label for="commentName">你的名字:</label>
+                <input type="text" id="commentName" placeholder="访客" required>
+                <label for="commentText">评论内容:</label>
+                <textarea id="commentText" placeholder="输入你的评论..." required></textarea>
+                <div class="char-count" id="commentCharCount">0/500</div>
+                <button type="submit">提交评论</button>
+            </form>
+        </div>`;
+    // 初始化评论者名字
+    const commentNameInput = content.querySelector('#commentName');
+    try {
+        const savedName = localStorage.getItem('commenterName');
+        if (savedName && commentNameInput) commentNameInput.value = savedName;
+    } catch (e) {}
+    // 渲染评论区和表单
+    let commentsDiv = document.querySelector('.comments');
+    if (!commentsDiv) {
+        commentsDiv = document.createElement('div');
+        commentsDiv.className = 'comments';
+        document.getElementById('content').appendChild(commentsDiv);
+    }
+    renderCommentForm(articleId);
+    renderComments(articleId);
+    // 图库导航
+    const gallery = content.querySelector('.gallery');
+    if (gallery && article.images.length > 1) {
+        let currentIndex = 0;
+        const img = gallery.querySelector('img');
+        const counter = gallery.querySelector('.counter');
+        const prevBtn = gallery.querySelector('.prev');
+        const nextBtn = gallery.querySelector('.next');
+        function updateGallery() {
+            if (img) img.src = article.images[currentIndex];
+            if (counter) counter.textContent = `${currentIndex + 1}/${article.images.length}`;
+        }
+        if (prevBtn) prevBtn.onclick = () => {
+            currentIndex = (currentIndex - 1 + article.images.length) % article.images.length;
+            updateGallery();
+        };
+        if (nextBtn) nextBtn.onclick = () => {
+            currentIndex = (currentIndex + 1) % article.images.length;
+            updateGallery();
+        };
+        if (img) img.onclick = () => showImageModal(article.images[currentIndex]);
+    }
+    // 评论提交
+    const commentForm = content.querySelector('#commentForm');
+    if (commentForm) {
+        commentForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const name = commentNameInput.value.trim();
+            const text = content.querySelector('#commentText').value.trim();
+            if (!name || !text) {
+                showNotification('请填写名字和评论内容', 'error');
+                return;
+            }
+            if (text.length > 500) {
+                showNotification('评论内容不能超过500字符', 'error');
+                return;
+            }
+            const date = new Date().toISOString().split('T')[0];
+            const commentId = Date.now().toString();
+            const newComment = { id: commentId, articleId: String(articleId), name, comment: text, date, parentId: null };
+            comments.push(newComment);
+            try {
+                localStorage.setItem('commenterName', name);
+            } catch (e) {}
+            await saveData();
+            showNotification('评论提交成功', 'success');
+            commentForm.reset();
+            commentNameInput.value = name;
+            // 关键：评论提交后刷新整个页面，确保comments数据同步
+            showArticle(articleId);
+        };
+        // 实时字数统计
+        const commentTextArea = content.querySelector('#commentText');
+        const charCountDisplay = content.querySelector('#commentCharCount');
+        if (commentTextArea && charCountDisplay) {
+            commentTextArea.addEventListener('input', () => {
+                const count = commentTextArea.value.length;
+                charCountDisplay.textContent = `${count}/500`;
+                charCountDisplay.style.color = count > 500 ? '#d16060' : 'inherit';
+            });
+        }
+    }
+    // 登录状态检查
+    let canComment = !!currentUser;
+    if (!canComment) {
+        if (commentForm) commentForm.style.display = 'none';
+        const tips = document.createElement('div');
+        tips.className = 'comment-login-tips';
+        tips.innerHTML = '请先<a href="#" id="loginToComment">登录</a>后发表评论';
+        content.appendChild(tips);
+        content.querySelector('#loginToComment').onclick = (e) => {
+            e.preventDefault();
+            showAuthModal();
+        };
+    }
+    initializeScrollAnimations();
+}

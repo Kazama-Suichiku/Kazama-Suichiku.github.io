@@ -452,7 +452,7 @@ nav ul li a:hover, nav ul li a.active {
 .contact .icon::before {
     content: '•';
     font-size: 16px; /* 固定大小，替换 1em */
-    color: var(--color-primary-light);
+    color: var (--color-primary-light);
     opacity: 0.6;
     margin-right: 4px;
     display: inline-block;
@@ -556,7 +556,7 @@ main {
     border: 1px solid var(--color-border-light);
     border-radius: 8px;
     background-color: var(--color-surface-light);
-    transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+    transition: background-color var(--transition-normal), box-shadow var (--transition-normal);
     box-shadow: 0 2px 6px var(--color-shadow-light);
     overflow: hidden;
 }
@@ -1089,19 +1089,47 @@ main h1 {
 }
 
 .comment {
-    padding: 24px; /* 替换 var(--space-l) */
-    background-color: rgba(255, 255, 255, 0.8);
+    padding: 24px;
+    background-color: #f5f7fa; /* 更深的背景色，提升对比度 */
     border-radius: 8px;
-    margin-bottom: 24px; /* 替换 var(--space-l) */
+    margin-bottom: 24px;
     border: 1px solid var(--color-border-light);
     overflow-wrap: break-word;
     position: relative;
     box-shadow: 0 2px 4px var(--color-shadow-light);
-    transition: background-color var(--transition-normal), box-shadow var(--transition-fast);
+    color: #222; /* 强制字体为深色 */
+    opacity: 1 !important; /* 保证动画失效时也可见 */
+    max-width: 100%;
+    transition: background-color var(--transition-normal), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.comment p, .comment small {
+    color: #222;
+}
+
+.comment.animate-on-scroll {
+    opacity: 1;
+    transform: none;
+}
+
+.comment[style*="margin-left"] {
+    max-width: calc(100% - 60px); /* 限制多级缩进最大宽度 */
+}
+
+body.dark-mode .comment {
+    background-color: #2d3440;
+    color: #e1e8f0;
+    border-color: var(--color-border-dark);
+    box-shadow: 0 2px 4px var(--color-shadow-dark);
 }
 
 .comment:hover {
     box-shadow: 0 4px 8px var(--color-shadow-light);
+    transform: translateY(-2px);
+}
+
+body.dark-mode .comment:hover {
+    box-shadow: 0 4px 8px var(--color-shadow-dark);
 }
 
 .comment p {
@@ -1150,6 +1178,50 @@ main h1 {
     content: "";
     display: table;
     clear: both;
+}
+
+.delete-comment-button {
+    background-color: transparent;
+    color: var(--color-accent-light);
+    border: 1px solid transparent;
+    padding: 4px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-left: 8px;
+    font-size: 13px;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    float: right;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.delete-comment-button:hover {
+    background-color: var(--color-accent-light);
+    color: white;
+    border-color: transparent;
+}
+
+body.dark-mode .delete-comment-button {
+    color: var(--color-accent-dark);
+}
+
+body.dark-mode .delete-comment-button:hover {
+    background-color: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+.char-count {
+    font-size: 13px;
+    color: var(--color-text-muted-light);
+    margin-top: -8px;
+    margin-bottom: 8px;
+    text-align: right;
+}
+
+body.dark-mode .char-count {
+    color: var(--color-text-muted-dark);
 }
 
 /* Comment Form */
@@ -1656,7 +1728,7 @@ body.dark-mode .new-article-form input, body.dark-mode .new-article-form select,
 }
 
 body.dark-mode .image-preview {
-    background-color: var(--color-bg-dark);
+    background-color: var (--color-bg-dark);
     border-color: var(--color-border-dark);
 }
 
@@ -2105,4 +2177,276 @@ body.dark-mode ::-webkit-scrollbar-thumb {
 
 body.dark-mode ::-webkit-scrollbar-thumb:hover {
     background: var(--color-primary-dark-dark);
+}
+
+/* 登录/注册弹窗样式 */
+.auth-modal {
+  position: fixed;
+  z-index: 2000;
+  left: 0; top: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40,60,80,0.18);
+  animation: fadeIn 0.2s;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.auth-modal-content {
+  background: var(--color-surface-light);
+  color: var(--color-text-light);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(90,125,154,0.18);
+  padding: 38px 36px 28px 36px;
+  min-width: 340px;
+  max-width: 90vw;
+  position: relative;
+  font-family: var(--font-body);
+  animation: slideInAuth 0.3s;
+}
+@keyframes slideInAuth { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+}
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-primary-light);
+  padding: 10px 0 8px 0;
+  border-bottom: 2.5px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.auth-tab.active {
+  color: var(--color-primary-dark-light);
+  border-bottom: 2.5px solid var(--color-primary-dark-light);
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.auth-form label {
+  font-size: 13px;
+  color: var(--color-text-muted-light);
+  font-weight: 700;
+  margin-bottom: 2px;
+  margin-top: 6px;
+}
+.auth-form input {
+  padding: 12px 14px;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 6px;
+  font-size: 15px;
+  background: var(--color-bg-light);
+  color: var(--color-text-light);
+  transition: border-color 0.2s;
+}
+.auth-form input:focus {
+  border-color: var(--color-primary-light);
+  outline: none;
+}
+.auth-form button {
+  margin-top: 10px;
+  padding: 12px 0;
+  background: var(--color-primary-light);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.auth-form button:hover {
+  background: var(--color-primary-dark-light);
+  transform: translateY(-2px) scale(1.03);
+}
+.auth-modal-close {
+  position: absolute;
+  top: 12px; right: 18px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--color-text-muted-light);
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  transition: background 0.2s, color 0.2s;
+}
+.auth-modal-close:hover {
+  background: var(--color-highlight-light);
+  color: var(--color-primary-light);
+}
+.auth-modal-status {
+  min-height: 22px;
+  font-size: 14px;
+  color: var(--color-text-muted-light);
+  margin: 8px 0 0 0;
+  text-align: center;
+}
+.auth-modal-status.error { color: #d16060; }
+.auth-modal-status.success { color: #6aae6a; }
+
+/* 登录状态UI */
+.auth-status-box {
+  background: var(--color-bg-light);
+  color: var(--color-text-light);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--color-shadow-light);
+  padding: 12px 10px 10px 10px;
+  margin: 18px 0 0 0;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+.auth-logout-btn {
+  background: var(--color-accent-light);
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.auth-logout-btn:hover {
+  background: #b07c4a;
+}
+.auth-open-btn {
+  background: var(--color-primary-light);
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  padding: 10px 30px;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 20px 0 0 0;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow-light);
+  transition: background 0.2s, transform 0.2s;
+}
+.auth-open-btn:hover {
+  background: var(--color-primary-dark-light);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* 暗色模式适配 */
+body.dark-mode .auth-modal-content {
+  background: var(--color-surface-dark);
+  color: var(--color-text-dark);
+}
+body.dark-mode .auth-form input {
+  background: var(--color-bg-dark);
+  color: var(--color-text-dark);
+  border-color: var(--color-border-dark);
+}
+body.dark-mode .auth-form input:focus {
+  border-color: var(--color-primary-dark);
+}
+body.dark-mode .auth-form button {
+  background: var(--color-primary-dark);
+  color: var(--color-bg-dark);
+}
+body.dark-mode .auth-form button:hover {
+  background: var(--color-primary-dark-dark);
+}
+body.dark-mode .auth-modal-close {
+  color: var(--color-text-muted-dark);
+}
+body.dark-mode .auth-modal-close:hover {
+  background: var(--color-highlight-dark);
+  color: var(--color-primary-dark);
+}
+body.dark-mode .auth-status-box {
+  background: var(--color-bg-dark);
+  color: var(--color-text-dark);
+  box-shadow: 0 2px 8px var(--color-shadow-dark);
+}
+body.dark-mode .auth-logout-btn {
+  background: var(--color-accent-dark);
+  color: var(--color-bg-dark);
+}
+body.dark-mode .auth-logout-btn:hover {
+  background: #b08c6a;
+}
+body.dark-mode .auth-open-btn {
+  background: var(--color-primary-dark);
+  color: var(--color-bg-dark);
+  box-shadow: 0 2px 8px var(--color-shadow-dark);
+}
+body.dark-mode .auth-open-btn:hover {
+  background: var(--color-primary-dark-dark);
+}
+
+/* 顶部登录状态UI美化 */
+.auth-header-status {
+  font-size: 15px;
+  color: var(--color-primary-light);
+  margin-right: 8px;
+}
+.auth-header-logout-btn {
+  background: var(--color-accent-light);
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: background 0.2s;
+}
+.auth-header-logout-btn:hover {
+  background: #b07c4a;
+}
+.auth-header-open-btn {
+  background: var(--color-primary-light);
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  padding: 8px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-left: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow-light);
+  transition: background 0.2s, transform 0.2s;
+}
+.auth-header-open-btn:hover {
+  background: var(--color-primary-dark-light);
+  transform: translateY(-2px) scale(1.03);
+}
+.comment-login-tips {
+  color: #d16060;
+  text-align: center;
+  margin: 18px 0 0 0;
+  font-size: 15px;
+}
+body.dark-mode .auth-header-status {
+  color: var(--color-primary-dark);
+}
+body.dark-mode .auth-header-logout-btn {
+  background: var(--color-accent-dark);
+  color: var(--color-bg-dark);
+}
+body.dark-mode .auth-header-logout-btn:hover {
+  background: #b08c6a;
+}
+body.dark-mode .auth-header-open-btn {
+  background: var(--color-primary-dark);
+  color: var(--color-bg-dark);
+  box-shadow: 0 2px 8px var(--color-shadow-dark);
+}
+body.dark-mode .auth-header-open-btn:hover {
+  background: var(--color-primary-dark-dark);
 }

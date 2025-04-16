@@ -15,6 +15,28 @@
     <!-- 添加particles.js库 -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
+    <!-- Firebase App (核心) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script>
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+        apiKey: "AIzaSyAU2iWEKT1qi8B3Fg1JHTfhFC_SQmyOF2k",
+        authDomain: "my-blog-fa883.firebaseapp.com",
+        databaseURL: "https://my-blog-fa883-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "my-blog-fa883",
+        storageBucket: "my-blog-fa883.firebasestorage.app",
+        messagingSenderId: "142782336652",
+        appId: "1:142782336652:web:18e907b3e4510bfb2eb5a9",
+        measurementId: "G-TZ7XSZTECY"
+    };
+    firebase.initializeApp(firebaseConfig);
+    </script>
+    <!-- 以上为Firebase初始化 -->
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
