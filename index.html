@@ -37,6 +37,14 @@
     </script>
     <!-- 以上为Firebase初始化 -->
 
+    <!-- EasyMDE Markdown 编辑器 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <!-- marked.js 用于 Markdown 渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- DOMPurify 用于 Markdown 渲染安全过滤 -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -62,10 +70,10 @@
     <div class="container">
         <aside class="sidebar">
             <div class="profile animate-on-scroll">
-                <img class="avatar" id="profileAvatar" src="img/3245decf851cdd6ef5203e41850e233a.jpg" alt="用户默认头像" loading="lazy">
+                <img class="avatar" id="profileAvatar" src="" loading="lazy" style="background: linear-gradient(135deg, #7fd7e7 0%, #b4e19e 100%);">
                 <h2 class="profile-name">Kazama_Suichiku</h2>
                 <p class="profile-bio">游戏技术美术爱好者。分享学习历程，记录点滴思考。希望我们都能学有所成！</p>
-                <div id="avatarUploadSection">
+                <div id="avatarUploadSection" style="display:none;">
                     <label for="avatarInput" class="avatar-upload-label">更换头像</label>
                     <input type="file" id="avatarInput" accept="image/jpeg,image/png" style="display: none;">
                     <img id="avatarPreview" class="avatar-preview" alt="头像预览">
@@ -75,7 +83,6 @@
                     <h3>联系方式</h3>
                     <p><a href="https://www.zhihu.com/people/48-52-52-27-65" target="_blank" rel="noopener noreferrer" title="知乎主页"><span class="icon zhihu"></span> 知乎</a></p>
                     <p><a href="https://space.bilibili.com/56807642?spm_id_from=333.788.0.0" target="_blank" rel="noopener noreferrer" title="Bilibili 主页"><span class="icon bilibili"></span> Bilibili</a></p>
-                    <!-- 新增GitHub链接 -->
                     <p><a href="https://github.com/Kazama-Suichiku" target="_blank" rel="noopener noreferrer" title="GitHub 主页"><span class="icon github"><i class="fab fa-github"></i></span> GitHub</a></p>
                 </div>
             </div>
@@ -92,6 +99,24 @@
     <button class="back-to-top" title="返回顶部">↑</button>
 
     <script src="script.js"></script>
+    <script>
+    // 登录状态下显示头像上传，否则显示渐变默认头像且不可更改
+    function updateAvatarUI(isLoggedIn, avatarUrl) {
+        const avatar = document.getElementById('profileAvatar');
+        const uploadSection = document.getElementById('avatarUploadSection');
+        if (!avatar || !uploadSection) return;
+        if (isLoggedIn) {
+            uploadSection.style.display = '';
+            avatar.style.background = '';
+            avatar.src = avatarUrl || '';
+        } else {
+            uploadSection.style.display = 'none';
+            avatar.src = '';
+            avatar.style.background = 'linear-gradient(135deg, #7fd7e7 0%, #b4e19e 100%)';
+        }
+    }
+    // 你需要在登录/登出状态变化时调用 updateAvatarUI(isLoggedIn, avatarUrl)
+    </script>
     <!-- Code injected by live-server -->
     <script>
         // <![CDATA[  <-- For SVG support
@@ -130,5 +155,43 @@
         }
         // ]]>
     </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
 </body>
 </html>

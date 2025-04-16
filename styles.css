@@ -306,12 +306,57 @@ nav ul li a:hover, nav ul li a.active {
 
 /* --- Main Layout Container --- */
 .container {
-    width: 1200px; /* 固定宽度 */
-    margin: 32px auto; /* 替换 var(--space-xl) */
+    width: 100%;
+    max-width: 1200px;
+    margin: 32px auto;
     display: flex;
     flex-wrap: nowrap;
-    gap: 20px; /* 固定像素值 */
+    gap: 20px;
     flex-grow: 1;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+@media (max-width: 1300px) {
+    .container {
+        max-width: 100vw;
+        padding: 0 10px;
+    }
+    nav {
+        width: 100%;
+        max-width: 100vw;
+        padding: 0 10px;
+    }
+}
+@media (max-width: 1000px) {
+    .container {
+        flex-direction: column;
+        gap: 0;
+        padding: 0 4vw;
+        align-items: center;
+    }
+    .sidebar {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 24px;
+        align-self: stretch;
+    }
+    main {
+        width: 100%;
+        max-width: 100vw;
+        padding: 0;
+    }
+}
+@media (max-width: 700px) {
+    .container {
+        padding: 0 2vw;
+        align-items: stretch;
+    }
+}
+@media (max-width: 500px) {
+    .container {
+        padding: 0 1vw;
+    }
 }
 
 /* --- Sidebar Refinements --- */
@@ -497,7 +542,7 @@ main {
     border-radius: 4px;
     font-size: 15px; /* 固定大小，替换 0.95rem */
     background-color: var(--color-bg-light);
-    color: var(--color-text-light);
+    color: var (--color-text-light);
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -859,7 +904,7 @@ main {
     border-radius: 20px;
     cursor: pointer;
     font-size: 13px; /* 固定大小，替换 0.8rem */
-    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    transition: background-color var(--transition-fast), color var (--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1039,7 +1084,7 @@ main h1 {
 }
 
 .gallery .next {
-    right: 16px; /* 替换 var(--space-m) */
+    right: 16px; /* 替换 var (--space-m) */
 }
 
 .gallery .counter {
@@ -1589,7 +1634,7 @@ body.dark-mode .theme-toggle-button {
 
 body.dark-mode .theme-toggle-button:hover {
     background-color: var(--color-highlight-dark);
-    color: var(--color-primary-dark);
+    color: var (--color-primary-dark);
     border-color: var(--color-border-dark);
 }
 
@@ -1619,7 +1664,7 @@ body.dark-mode #avatarUploadSection {
 
 body.dark-mode .avatar-upload-label {
     background-color: transparent;
-    color: var(--color-primary-dark);
+    color: var (--color-primary-dark);
     border-color: var(--color-primary-dark);
 }
 
@@ -1692,7 +1737,7 @@ body.dark-mode .suggestion {
 }
 
 body.dark-mode .suggestion:hover {
-    background-color: var(--color-bg-dark);
+    background-color: var(--color-highlight-dark);
 }
 
 body.dark-mode .new-article-toggle {
@@ -2369,7 +2414,7 @@ body.dark-mode .auth-modal-close:hover {
 }
 body.dark-mode .auth-status-box {
   background: var(--color-bg-dark);
-  color: var(--color-text-dark);
+  color: var (--color-text-dark);
   box-shadow: 0 2px 8px var(--color-shadow-dark);
 }
 body.dark-mode .auth-logout-btn {
@@ -2449,4 +2494,317 @@ body.dark-mode .auth-header-open-btn {
 }
 body.dark-mode .auth-header-open-btn:hover {
   background: var(--color-primary-dark-dark);
+}
+
+/* 自适应布局优化 */
+@media (max-width: 1300px) {
+    .container {
+        width: 100%;
+        max-width: 100vw;
+        padding: 0 10px;
+    }
+    nav {
+        width: 100%;
+        max-width: 100vw;
+        padding: 0 10px;
+    }
+}
+@media (max-width: 1000px) {
+    .container {
+        flex-direction: column;
+        gap: 0;
+        padding: 0 4vw;
+    }
+    .sidebar {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 24px;
+        align-self: stretch;
+    }
+    main {
+        width: 100%;
+        max-width: 100vw;
+        padding: 0;
+    }
+}
+@media (max-width: 700px) {
+    html, body {
+        min-width: 0;
+        font-size: 15px;
+    }
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 4vw;
+    }
+    .logo-link {
+        font-size: 18px;
+    }
+    .container {
+        padding: 0 2vw;
+    }
+    .sidebar {
+        padding: 16px;
+        border-radius: 8px;
+    }
+    .profile .avatar {
+        width: 90px;
+        height: 90px;
+    }
+    .profile-name {
+        font-size: 20px;
+    }
+    .profile-bio {
+        font-size: 13px;
+    }
+    .article-page {
+        padding: 18px 0 32px 0;
+        max-width: 100vw;
+    }
+    .article-page h1 {
+        font-size: 28px;
+    }
+    .article-content p {
+        font-size: 15px;
+    }
+    .article-list {
+        gap: 18px;
+    }
+    .article {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+    .article img {
+        width: 100%;
+        height: auto;
+        min-height: 120px;
+        max-height: 220px;
+    }
+    .gallery {
+        margin: 18px 0 24px 0;
+    }
+    .gallery img {
+        max-height: 40vh;
+    }
+    .sidebar, .article, .about-page, #commentForm {
+        box-shadow: none;
+    }
+    #commentForm {
+        padding: 16px;
+    }
+    .comments {
+        padding-top: 18px;
+    }
+    .comment {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    .image-preview {
+        padding: 8px;
+        gap: 8px;
+    }
+    .image-container img {
+        width: 60px;
+        height: 60px;
+    }
+    .back-to-top {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+        right: 10px;
+        bottom: 10px;
+    }
+    footer {
+        padding: 18px;
+        font-size: 12px;
+    }
+}
+@media (max-width: 500px) {
+    html, body {
+        font-size: 13px;
+    }
+    .container {
+        padding: 0 1vw;
+    }
+    .sidebar {
+        padding: 8px;
+        border-radius: 6px;
+    }
+    .profile .avatar {
+        width: 60px;
+        height: 60px;
+    }
+    .profile-name {
+        font-size: 15px;
+    }
+    .article-page {
+        padding: 8px 0 16px 0;
+    }
+    .article-page h1 {
+        font-size: 18px;
+    }
+    .article-content p {
+        font-size: 12px;
+    }
+    .article {
+        padding: 6px;
+        border-radius: 4px;
+    }
+    .image-container img {
+        width: 40px;
+        height: 40px;
+    }
+    .about-page {
+        padding: 8px 4px;
+        border-radius: 4px;
+    }
+    #commentForm {
+        padding: 8px;
+        border-radius: 4px;
+    }
+    .comment {
+        padding: 6px;
+        border-radius: 4px;
+    }
+    .back-to-top {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    footer {
+        padding: 8px;
+        font-size: 10px;
+    }
+}
+
+/* --- Paper-like Editor Background --- */
+.EasyMDEContainer, .CodeMirror, #articleContent, .editor-paper-bg {
+  background: #f8f5e6 !important;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(180,160,120,0.08);
+  border: 1px solid #e5e0d8;
+  font-family: 'Merriweather', 'Lato', serif, sans-serif;
+  color: #3a2c1a;
+}
+
+body.dark-mode .EasyMDEContainer, body.dark-mode .CodeMirror, body.dark-mode #articleContent, body.dark-mode .editor-paper-bg {
+  background: #2d2a26 !important;
+  color: #e5e0d8;
+  border: 1px solid #3a3328;
+}
+
+/* 美化EasyMDE工具栏 */
+.EasyMDEContainer .editor-toolbar {
+  background: #f3ede0;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid #e5e0d8;
+  border-bottom: none;
+  box-shadow: 0 2px 8px rgba(180,160,120,0.06);
+}
+body.dark-mode .EasyMDEContainer .editor-toolbar {
+  background: #23201c;
+  border-color: #3a3328;
+}
+.EasyMDEContainer .editor-toolbar button {
+  border-radius: 6px;
+  margin: 0 2px;
+  transition: background 0.2s, color 0.2s;
+}
+.EasyMDEContainer .editor-toolbar button:hover {
+  background: #e5e0d8;
+  color: #b08c6a;
+}
+body.dark-mode .EasyMDEContainer .editor-toolbar button:hover {
+  background: #3a3328;
+  color: #ffe6b3;
+}
+
+/* 编辑区排版优化 */
+.CodeMirror-lines {
+  font-size: 17px;
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+  padding: 18px 0;
+}
+
+/* Markdown预览区优化 */
+.editor-preview, .editor-preview-active {
+  background: #f8f5e6 !important;
+  color: #3a2c1a;
+  font-size: 17px;
+  line-height: 1.85;
+  padding: 24px 32px;
+  border-radius: 0 0 10px 10px;
+}
+body.dark-mode .editor-preview, body.dark-mode .editor-preview-active {
+  background: #2d2a26 !important;
+  color: #e5e0d8;
+}
+
+/* 让预览区图片更美观 */
+.editor-preview img, .editor-preview-active img {
+  max-width: 90%;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(80,60,30,0.08);
+  margin: 18px auto;
+  display: block;
+}
+
+/* Markdown说明样式 */
+.markdown-hint {
+  background: #f8f5e6;
+  color: #8a7b5a;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e0d8;
+}
+body.dark-mode .markdown-hint {
+  background: #2d2a26;
+  color: #e5e0d8;
+  border-color: #3a3328;
+}
+
+/* 响应式图片样式优化 */
+@media (max-width: 900px) {
+  .gallery img {
+    max-height: 50vh;
+  }
+  .image-container img {
+    width: 70px;
+    height: 70px;
+  }
+}
+@media (max-width: 600px) {
+  .gallery {
+    margin: 16px 0 24px 0;
+    border-radius: 4px;
+  }
+  .gallery img {
+    border-radius: 4px;
+    max-height: 35vh;
+  }
+  .image-container img {
+    width: 48px;
+    height: 48px;
+    border-radius: 3px;
+  }
+  .article-content p {
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+}
+
+/* 保证图片不溢出容器 */
+.article-content img,
+.editor-preview img,
+.editor-preview-active img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 18px auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(80,60,30,0.08);
 }

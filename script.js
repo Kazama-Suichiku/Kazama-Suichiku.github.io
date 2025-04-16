@@ -254,16 +254,43 @@ function showImageModal(src) {
 }
 
 // --- 本地存储头像相关 ---
+// 邮箱转firebase安全key
+function emailToKey(email) {
+    return String(email).replace(/\./g, '_');
+}
+
 function loadAvatar() {
-    try {
-        const savedAvatar = localStorage.getItem('userAvatar');
-        const profileAvatar = document.getElementById('profileAvatar');
-        if (savedAvatar && profileAvatar) profileAvatar.src = savedAvatar;
-        else if (profileAvatar) profileAvatar.onerror = () => {
-            profileAvatar.src = '';
-            profileAvatar.alt = '头像加载失败';
-        };
-    } catch (e) {}
+    const profileAvatar = document.getElementById('profileAvatar');
+    const uploadSection = document.getElementById('avatarUploadSection');
+    if (!profileAvatar || !uploadSection) return;
+    if (currentUser) {
+        // 登录用户：从firebase加载头像（用UID）
+        db.ref('avatars/Y48yvlcBXEbrhLH3ZMk4ad9KbU32').once('value').then(snap => {
+            const val = snap.val();
+            if (val) {
+                profileAvatar.src = val;
+                profileAvatar.style.background = '';
+            } else {
+                profileAvatar.src = '';
+                profileAvatar.style.background = 'linear-gradient(135deg, #7fd7e7 0%, #b4e19e 100%)';
+            }
+        });
+        uploadSection.style.display = '';
+    } else {
+        // 未登录时显示专属头像（不可编辑，UID固定）
+        db.ref('avatars/Y48yvlcBXEbrhLH3ZMk4ad9KbU32').once('value').then(snap => {
+            const val = snap.val();
+            if (val) {
+                profileAvatar.src = val;
+                profileAvatar.style.background = '';
+            } else {
+                profileAvatar.src = '';
+                profileAvatar.style.background = 'linear-gradient(135deg, #7fd7e7 0%, #b4e19e 100%)';
+            }
+        });
+        uploadSection.style.display = 'none';
+        return;
+    }
 }
 
 function initAvatarUpload() {
@@ -277,16 +304,29 @@ function initAvatarUpload() {
     // 确保点击标签只触发一次文件选择
     const triggerFileInput = (e) => {
         e.preventDefault();
+        if (!currentUser) return; // 未登录禁止上传
         avatarInput.click();
     };
     avatarLabel.addEventListener('click', triggerFileInput);
 
     avatarInput.onchange = async () => {
+        if (!currentUser) return;
         const file = avatarInput.files ? avatarInput.files[0] : null;
         uploadButton.disabled = true;
         avatarPreview.style.display = 'none';
         previewedAvatarData = null;
         if (!file) return;
+        // 类型和大小前置校验
+        if (!file.type.match(/image\/(jpeg|png)/)) {
+            showNotification('仅支持JPG/PNG格式头像', 'error');
+            avatarInput.value = '';
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            showNotification('头像需小于2MB', 'error');
+            avatarInput.value = '';
+            return;
+        }
         try {
             showNotification('正在处理图片...', 'info');
             const compressed = await compressImage(file, true);
@@ -302,19 +342,20 @@ function initAvatarUpload() {
     };
 
     uploadButton.onclick = async () => {
-        if (!previewedAvatarData) {
+        if (!currentUser || !previewedAvatarData) {
             showNotification('请先选择图片', 'error');
             return;
         }
         try {
-            localStorage.setItem('userAvatar', previewedAvatarData);
+            await db.ref('avatars/' + currentUser.uid).set(previewedAvatarData);
             profileAvatar.src = previewedAvatarData;
-            await saveAvatarToFirebase(previewedAvatarData);
+            profileAvatar.style.background = '';
             avatarInput.value = '';
             avatarPreview.src = '';
             avatarPreview.style.display = 'none';
             uploadButton.disabled = true;
             previewedAvatarData = null;
+            showNotification('头像已同步到云端', 'success');
         } catch (e) {
             showNotification(`保存失败: ${e.message || '未知错误'}`, 'error');
         }
@@ -322,6 +363,18 @@ function initAvatarUpload() {
 }
 
 // --- 文章和评论渲染 ---
+// EasyMDE 编辑器单例
+let easyMDEInstance = null;
+
+function destroyEasyMDE() {
+    if (easyMDEInstance) {
+        try {
+            easyMDEInstance.toTextArea();
+            easyMDEInstance = null;
+        } catch (e) {}
+    }
+}
+
 async function saveData() {
     await db.ref('articles').set(Object.fromEntries(articles.map(a => [a.id, a])));
     await db.ref('comments').set(Object.fromEntries(comments.map(c => [c.id, c])));
@@ -414,6 +467,8 @@ async function showEditForm(articleId) {
     }
     const content = document.getElementById('content');
     if (!content) return;
+    // 销毁旧的 EasyMDE 实例，防止重复初始化
+    destroyEasyMDE();
     content.innerHTML = `
         <div class="animate-on-scroll">
             <h1>编辑文章</h1>
@@ -426,9 +481,13 @@ async function showEditForm(articleId) {
                 </select>
                 <label for="articleContent">内容:</label>
                 <textarea id="articleContent" required>${article.content || ''}</textarea>
+                <div style="margin:8px 0 16px 0;">
+                    <input type="file" id="mdImageInput" accept="image/jpeg,image/png" style="display:none;">
+                    <button type="button" id="insertMdImageBtn">插入图片到正文</button>
+                </div>
                 <label for="articleImage">图片（最多5张）:</label>
                 <input type="file" id="articleImage" accept="image/jpeg,image/png" multiple>
-                <div class="image-preview" id="imagePreview"></div>
+                <div class="image-preview" id="imagePreview"><p style='width:100%;text-align:center;color:#888;'>图片加载中...</p></div>
                 <div style="display:flex;gap:10px;margin-top:10px;">
                     <button type="submit">保存更改</button>
                     <button type="button" id="cancelEditButton">取消</button>
@@ -439,7 +498,10 @@ async function showEditForm(articleId) {
     const imageInput = content.querySelector('#articleImage');
     let currentImages = [...(article.images || [])];
 
-    function renderPreviews() {
+    // 异步渲染图片预览，先显示 loading
+    async function renderPreviews() {
+        previewContainer.innerHTML = '<p style="width:100%;text-align:center;color:#888;">图片加载中...</p>';
+        await new Promise(r => setTimeout(r, 0)); // 让UI先渲染
         previewContainer.innerHTML = '';
         currentImages.forEach((src, idx) => {
             const div = document.createElement('div');
@@ -493,12 +555,68 @@ async function showEditForm(articleId) {
         showNotification(`已选择${files.length}张新图片，保存后生效`, 'info');
     };
 
+    // Markdown编辑器集成（懒加载，单例，异步初始化）
+    setTimeout(() => {
+        if (easyMDEInstance) destroyEasyMDE();
+        easyMDEInstance = new EasyMDE({
+            element: document.getElementById('articleContent'),
+            spellChecker: false,
+            status: false,
+            minHeight: '300px',
+            maxHeight: '600px',
+            toolbar: [
+                'bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen', '|', {
+                    name: 'insertImage',
+                    action: function customInsertImage(editor) {
+                        setTimeout(() => {
+                            document.getElementById('mdImageInput').click();
+                        }, 0);
+                    },
+                    className: 'fa fa-image',
+                    title: '插入图片到正文'
+                }
+            ]
+        });
+    }, 0);
+
+    // 图片插入到正文
+    const mdImageInput = document.getElementById('mdImageInput');
+    const insertMdImageBtn = document.getElementById('insertMdImageBtn');
+    insertMdImageBtn.onclick = () => setTimeout(() => mdImageInput.click(), 0);
+    mdImageInput.onchange = async function() {
+        const file = this.files[0];
+        if (!file) return;
+        try {
+            showNotification('正在处理图片...', 'info');
+            const url = await compressImage(file, false); // 返回base64
+            if (easyMDEInstance) {
+                const cm = easyMDEInstance.codemirror;
+                const pos = cm.getCursor();
+                cm.replaceRange(`![](${url})\n`, pos);
+            }
+            showNotification('图片已插入正文', 'success');
+        } catch (e) {
+            showNotification('图片处理失败: ' + (e.message || '未知错误'), 'error');
+        }
+        this.value = '';
+    };
+
+    // 输入事件加防抖，减少频繁重渲染
+    const titleInput = document.getElementById('articleTitle');
+    let debounceTimer = null;
+    titleInput.oninput = function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            // 可扩展：如自动保存草稿等
+        }, 300);
+    };
+
     const form = content.querySelector('#editArticleForm');
     form.onsubmit = async function(e) {
         e.preventDefault();
         const title = document.getElementById('articleTitle').value.trim();
         const category = document.getElementById('articleCategory').value;
-        const text = document.getElementById('articleContent').value.trim();
+        const text = easyMDEInstance ? easyMDEInstance.value().trim() : document.getElementById('articleContent').value.trim();
         if (!title || !category || !text) {
             showNotification('标题、分类和内容不能为空', 'error');
             return;
@@ -523,6 +641,7 @@ async function showEditForm(articleId) {
             articles[index] = { ...articles[index], title, category, content: text, images: finalImages, date: new Date().toISOString().split('T')[0] };
             await saveData();
             showNotification('文章更新成功', 'success');
+            destroyEasyMDE();
             window.location.hash = `#article/${articleId}`;
         } else {
             showNotification('更新失败：未找到文章', 'error');
@@ -530,7 +649,10 @@ async function showEditForm(articleId) {
     };
 
     content.querySelector('#cancelEditButton').onclick = () => {
-        if (confirm('确定取消编辑？更改将不会保存。')) window.location.hash = `#article/${articleId}`;
+        if (confirm('确定取消编辑？更改将不会保存。')) {
+            destroyEasyMDE();
+            window.location.hash = `#article/${articleId}`;
+        }
     };
     initializeScrollAnimations();
 }
@@ -709,10 +831,14 @@ function renderCommentsForArticle(articleId, parentId = null, level = 0, contain
     const MAX_NESTING_LEVEL = 3;
     if (!container) container = document.querySelector('.comments');
     if (!container) return;
-    // 渲染前清空内容，避免旧内容残留
     if (level === 0) container.innerHTML = '';
-    const filteredComments = comments.filter(c => String(c.articleId) === String(articleId) && String(c.parentId) === String(parentId));
-    if (filteredComments.length === 0 && parentId === null && level === 0) {
+    // 修正parentId判断，兼容null、undefined、""、"null"
+    const isRoot = (val) => val === null || val === undefined || val === '' || val === 'null';
+    const filteredComments = comments.filter(c =>
+        String(c.articleId) === String(articleId) &&
+        (isRoot(parentId) ? isRoot(c.parentId) : String(c.parentId) === String(parentId))
+    );
+    if (filteredComments.length === 0 && isRoot(parentId) && level === 0) {
         container.innerHTML = '<p style="color:#888;font-size:14px;text-align:center;">暂无评论，快来发表第一条吧！</p>';
         return;
     }
@@ -721,13 +847,24 @@ function renderCommentsForArticle(articleId, parentId = null, level = 0, contain
         div.className = 'comment animate-on-scroll';
         div.style.marginLeft = `${level * 20}px`;
         div.style.setProperty('--comment-index', index);
+        // 兼容 comment/content 字段
+        const commentText = comment.comment || comment.content || '';
         div.innerHTML = `
-            <p><strong>${comment.name || '匿名'}</strong>${comment.comment}</p>
+            <p><strong>${comment.name || '匿名'}</strong>${commentText}</p>
             <small>发表于 ${comment.date || '未知'}</small>
             ${level < MAX_NESTING_LEVEL ? `<button class="reply-button" data-comment-id="${comment.id}" data-comment-name="${comment.name || '匿名'}" title="回复此评论">回复</button>` : ''}
             ${isAdmin() ? `<button class="delete-comment-button" data-comment-id="${comment.id}" title="删除评论">删除</button>` : ''}
             <div id="reply-form-container-${comment.id}" class="reply-form-container" style="display:none;"></div>`;
         container.appendChild(div);
+        // 关键：为回复按钮绑定事件，弹出内联回复框
+        if (level < MAX_NESTING_LEVEL) {
+            const replyBtn = div.querySelector('.reply-button');
+            if (replyBtn) {
+                replyBtn.onclick = function() {
+                    openInlineReplyForm(comment.id, comment.name, div);
+                };
+            }
+        }
         const replyContainer = div.querySelector(`#reply-form-container-${comment.id}`);
         if (level < MAX_NESTING_LEVEL) {
             renderCommentsForArticle(articleId, comment.id, level + 1, replyContainer);
@@ -746,8 +883,9 @@ async function showArticle(articleId) {
     }
     const content = document.getElementById('content');
     if (!content) return;
-    const paragraphs = (article.content || '').split('\n').filter(p => p.trim().length > 0);
-    const contentHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+    // 用 marked.js 渲染 Markdown，并用 DOMPurify 过滤防止 XSS
+    const rawHtml = marked.parse(article.content || '');
+    const contentHtml = DOMPurify.sanitize(rawHtml);
     content.innerHTML = `
         <div class="article-page" data-article-id="${articleId}">
             <h1 class="animate-on-scroll">${article.title || '无题'}</h1>
@@ -821,11 +959,10 @@ async function showArticle(articleId) {
             const date = new Date().toISOString().split('T')[0];
             const commentId = Date.now().toString();
             const newComment = { id: commentId, articleId: String(articleId), name, comment: text, date, parentId: null };
-            comments.push(newComment);
+            await saveCommentToFirebase(newComment);
             try {
                 localStorage.setItem('commenterName', name);
             } catch (e) {}
-            await saveData();
             showNotification('评论提交成功', 'success');
             commentForm.reset();
             commentNameInput.value = name;
@@ -861,13 +998,18 @@ async function showArticle(articleId) {
 
 async function deleteComment(commentId, articleId) {
     if (!confirm('确定删除此评论？（包括其所有回复，仅限当前会话）')) return;
-    const removeCommentAndReplies = (id) => {
-        comments = comments.filter(c => String(c.id) !== String(id));
-        const childComments = comments.filter(c => String(c.parentId) === String(id));
-        childComments.forEach(child => removeCommentAndReplies(child.id));
-    };
-    removeCommentAndReplies(commentId);
-    await saveData();
+    const toDelete = [];
+    function collectToDelete(id) {
+        comments.filter(c => String(c.parentId) === String(id)).forEach(child => collectToDelete(child.id));
+        const c = comments.find(c => c.id === id);
+        if (c && c._pushId) toDelete.push(c._pushId);
+    }
+    collectToDelete(commentId);
+    const c = comments.find(c => c.id === commentId);
+    if (c && c._pushId) toDelete.push(c._pushId);
+    for (const pushId of toDelete) {
+        await deleteCommentFromFirebase(pushId);
+    }
     showNotification('评论已删除', 'success');
     showArticle(articleId);
 }
@@ -1030,20 +1172,12 @@ async function handleInlineReplySubmit(formElement) {
     }
     const date = new Date().toISOString().split('T')[0];
     const commentId = Date.now().toString();
-    comments.push({
-        id: commentId,
-        articleId: String(articleId),
-        name,
-        comment: commentText,
-        date,
-        parentId
-    });
+    const replyComment = { id: commentId, articleId: String(articleId), name, comment: commentText, date, parentId };
+    await saveCommentToFirebase(replyComment);
     try {
         localStorage.setItem('commenterName', name);
     } catch (e) {}
-    await saveData();
     showNotification('回复提交成功', 'success');
-    showArticle(articleId);
 }
 
 // --- 关于页面 ---
@@ -1240,6 +1374,7 @@ function listenAuthState() {
     auth.onAuthStateChanged(user => {
         currentUser = user;
         showAuthStatusInHeader();
+        loadAvatar();
         if (user) loadAvatarFromFirebase();
         if (window.location.hash === '' || window.location.hash === '#home') {
             showHome();
@@ -1248,6 +1383,14 @@ function listenAuthState() {
 }
 
 // === firebase数据同步部分 ===
+// 保存单条评论到firebase（追加，不覆盖）
+async function saveCommentToFirebase(commentObj) {
+    await db.ref('comments/1744806386348').push(commentObj);
+}
+// 删除单条评论（通过pushId）
+async function deleteCommentFromFirebase(pushId) {
+    await db.ref('comments/1744806386348/' + pushId).remove();
+}
 // 监听文章和评论的实时变化
 function listenRealtimeData() {
     db.ref('articles').on('value', snap => {
@@ -1255,11 +1398,10 @@ function listenRealtimeData() {
         articles = val ? Object.values(val) : [];
         if (window.updateArticles) window.updateArticles(1);
     });
-    db.ref('comments').on('value', snap => {
+    db.ref('comments/1744806386348').on('value', snap => {
         const val = snap.val();
-        comments = val ? Object.values(val) : [];
-        console.log('firebase comments监听回调触发，comments:', comments);
-        // 若在文章页，直接刷新整篇文章，保证评论区一定渲染
+        // 拉平成数组，带pushId
+        comments = val ? Object.entries(val).map(([pushId, c]) => ({...c, _pushId: pushId})) : [];
         const hash = window.location.hash;
         if (hash.startsWith('#article/')) {
             const articleId = hash.replace('#article/', '');
@@ -1275,17 +1417,17 @@ async function saveData() {
     showNotification('更改已同步到云端', 'success');
 }
 
-// 头像上传到firebase（每个用户独立）
+// 头像上传到firebase（每个用户独立，UID）
 async function saveAvatarToFirebase(base64) {
     if (!currentUser) return;
-    await db.ref('avatars/' + currentUser.uid).set(base64);
+    await db.ref('avatars/Y48yvlcBXEbrhLH3ZMk4ad9KbU32').set(base64);
     showNotification('头像已同步到云端', 'success');
 }
 
 // 从firebase加载头像
 function loadAvatarFromFirebase() {
     if (!currentUser) return;
-    db.ref('avatars/' + currentUser.uid).once('value').then(snap => {
+    db.ref('avatars/Y48yvlcBXEbrhLH3ZMk4ad9KbU32').once('value').then(snap => {
         const val = snap.val();
         const profileAvatar = document.getElementById('profileAvatar');
         if (val && profileAvatar) profileAvatar.src = val;
@@ -1499,8 +1641,9 @@ async function showArticle(articleId) {
     }
     const content = document.getElementById('content');
     if (!content) return;
-    const paragraphs = (article.content || '').split('\n').filter(p => p.trim().length > 0);
-    const contentHtml = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+    // 用 marked.js 渲染 Markdown，并用 DOMPurify 过滤防止 XSS
+    const rawHtml = marked.parse(article.content || '');
+    const contentHtml = DOMPurify.sanitize(rawHtml);
     content.innerHTML = `
         <div class="article-page" data-article-id="${articleId}">
             <h1 class="animate-on-scroll">${article.title || '无题'}</h1>
@@ -1532,15 +1675,8 @@ async function showArticle(articleId) {
         const savedName = localStorage.getItem('commenterName');
         if (savedName && commentNameInput) commentNameInput.value = savedName;
     } catch (e) {}
-    // 渲染评论区和表单
-    let commentsDiv = document.querySelector('.comments');
-    if (!commentsDiv) {
-        commentsDiv = document.createElement('div');
-        commentsDiv.className = 'comments';
-        document.getElementById('content').appendChild(commentsDiv);
-    }
-    renderCommentForm(articleId);
-    renderComments(articleId);
+    // 渲染评论
+    renderCommentsForArticle(articleId);
     // 图库导航
     const gallery = content.querySelector('.gallery');
     if (gallery && article.images.length > 1) {
@@ -1581,11 +1717,10 @@ async function showArticle(articleId) {
             const date = new Date().toISOString().split('T')[0];
             const commentId = Date.now().toString();
             const newComment = { id: commentId, articleId: String(articleId), name, comment: text, date, parentId: null };
-            comments.push(newComment);
+            await saveCommentToFirebase(newComment);
             try {
                 localStorage.setItem('commenterName', name);
             } catch (e) {}
-            await saveData();
             showNotification('评论提交成功', 'success');
             commentForm.reset();
             commentNameInput.value = name;
