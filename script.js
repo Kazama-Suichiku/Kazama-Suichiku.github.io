@@ -7,6 +7,10 @@ const categories = ['技术', '生活', '其他'];
 let previewedAvatarData = null;
 let intersectionObserver = null;
 let currentOpenReplyForm = null;
+// 用于保存鼠标视差（parallax）事件处理器，便于重新初始化时清理
+let particleParallaxHandler = null;
+// 用于节流视差更新
+let particleParallaxRaf = null;
 
 // === 主题切换功能 ===
 const themeToggleButton = document.getElementById('themeToggle');
@@ -31,7 +35,9 @@ function applyTheme(theme) {
     }
     try {
         localStorage.setItem('theme', theme);
-        initializeParticles();
+    initializeParticles();
+    // 切换高亮主题
+    toggleHighlightTheme();
     } catch (e) {
         console.error('主题保存失败:', e);
     }
@@ -66,39 +72,42 @@ function initializeParticles() {
         window.pJSDom = [];
     }
 
+    // 获取当前主题颜色
+    const isDark = document.documentElement.classList.contains('dark-mode');
+    const primaryColor = isDark ? '#92c1de' : '#5a7d9a';
+    const secondaryColor = isDark ? '#d8b593' : '#c89b70';
+
+    // 清理上一次可能绑定的视差处理器，避免重复绑定
+    if (particleParallaxHandler) {
+        window.removeEventListener('mousemove', particleParallaxHandler);
+        particleParallaxHandler = null;
+    }
+
     particlesJS('particles-js', {
         particles: {
-            number: {
-                value: 80,
-                density: { enable: true, value_area: 800 }
-            },
-            color: {
-                value: document.documentElement.classList.contains('dark-mode') ? '#92c1de' : '#5a7d9a'
-            },
-            shape: {
-                type: 'circle',
-                stroke: { width: 0, color: '#000000' }
-            },
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: [primaryColor, secondaryColor, '#ffffff'] },
+            shape: { type: 'circle', stroke: { width: 0.5, color: 'rgba(255,255,255,0.08)' } },
             opacity: {
-                value: 0.6,
+                value: 0.7,
                 random: true,
-                anim: { enable: true, speed: 1, opacity_min: 0.2, sync: false }
+                anim: { enable: true, speed: 1.2, opacity_min: 0.08, sync: false }
             },
             size: {
                 value: 4,
                 random: true,
-                anim: { enable: true, speed: 2, size_min: 1, sync: false }
+                anim: { enable: true, speed: 2, size_min: 0.5, sync: false }
             },
             line_linked: {
                 enable: true,
-                distance: 120,
-                color: document.documentElement.classList.contains('dark-mode') ? '#92c1de' : '#5a7d9a',
-                opacity: 0.5,
+                distance: 160,
+                color: primaryColor,
+                opacity: 0.22,
                 width: 1
             },
             move: {
                 enable: true,
-                speed: 3,
+                speed: 0.9,
                 direction: 'none',
                 random: true,
                 straight: false,
@@ -107,30 +116,166 @@ function initializeParticles() {
             }
         },
         interactivity: {
-            detect_on: 'canvas',
+            detect_on: 'window',
             events: {
-                onhover: { enable: true, mode: 'grab' },
-                onclick: { enable: true, mode: 'push' },
+                onhover: { enable: true, mode: ['grab', 'bubble'] },
+                onclick: { enable: true, mode: ['push', 'bubble'] },
                 resize: true
             },
             modes: {
-                grab: {
-                    distance: 150,
-                    line_linked: { opacity: 0.8 }
-                },
-                push: {
-                    particles_nb: 6
-                },
-                repulse: {
-                    distance: 100,
-                    duration: 0.4
-                }
+                grab: { distance: 140, line_linked: { opacity: 0.85 } },
+                bubble: { distance: 180, size: 12, duration: 0.8, opacity: 0.95 },
+                push: { particles_nb: 4 },
+                repulse: { distance: 120, duration: 0.6 }
             }
         },
         retina_detect: true
     });
 
-    console.log('粒子动画已初始化');
+    // 添加一个轻量的视差效果：根据鼠标位置平移画布，配合低速粒子移动产生深度感
+    const canvasEl = document.getElementById('particles-js');
+    // 在移动设备上或宽度小于700px时禁用视差与粒子以节约性能
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch || window.innerWidth < 700) {
+        // 停用粒子移动与视差：让粒子静止或直接不初始化
+        try { window.pJSDom && window.pJSDom.forEach(p => p.pJS.fn.vendors.destroypJS()); } catch(e){}
+        return;
+    }
+    if (canvasEl) {
+        // 使用 requestAnimationFrame 节流视差更新
+        particleParallaxHandler = (e) => {
+            if (particleParallaxRaf) cancelAnimationFrame(particleParallaxRaf);
+            particleParallaxRaf = requestAnimationFrame(() => {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                const x = (e.clientX - w / 2) / (w / 2); // -1 .. 1
+                const y = (e.clientY - h / 2) / (h / 2);
+                const tx = x * 8; // px
+                const ty = y * 6; // px
+                canvasEl.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+            });
+        };
+        window.addEventListener('mousemove', particleParallaxHandler);
+    }
+
+    console.log('粒子动画已初始化（美化版）');
+}
+
+// --- Markdown 渲染优化: 使用 highlight.js 高亮代码块，并为图片/链接添加增强 ---
+try {
+    if (window.marked && window.hljs) {
+        marked.setOptions({
+            highlight: function(code, lang) {
+                try {
+                    if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, {language: lang}).value;
+                    return hljs.highlightAuto(code).value;
+                } catch (e) {
+                    return hljs.highlightAuto(code).value;
+                }
+            },
+            langPrefix: 'hljs language-'
+        });
+    }
+} catch (e) {}
+
+function toggleHighlightTheme() {
+    try {
+        const light = document.getElementById('hl-theme-light');
+        const dark = document.getElementById('hl-theme-dark');
+        const isDark = document.documentElement.classList.contains('dark-mode');
+        if (light && dark) {
+            light.disabled = isDark;
+            dark.disabled = !isDark;
+        }
+    } catch (e) {}
+}
+
+// 初次设置高亮主题
+try { toggleHighlightTheme(); } catch(e) {}
+
+function enhanceRenderedMarkdown(container) {
+    if (!container) return;
+    // 1) 代码高亮（如果 highlight.js 已加载）
+    try { if (window.hljs) container.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block)); } catch(e) {}
+    // 2) 图片懒加载并绑定 lightbox
+    container.querySelectorAll('img').forEach(img => {
+        // 支持 LQIP：如果元素有 data-lqip 属性，先用低质量占位，待大图 load 完成再淡入
+        const src = img.getAttribute('src');
+        const lqip = img.getAttribute('data-lqip');
+        if (lqip) {
+            img.style.filter = 'blur(6px)';
+            img.style.transition = 'filter 400ms ease, opacity 400ms ease';
+            img.src = lqip;
+            const fullImg = new Image();
+            fullImg.onload = () => {
+                img.src = src;
+                img.style.filter = 'blur(0)';
+                img.style.opacity = '1';
+            };
+            fullImg.src = src;
+        }
+        if (!img.getAttribute('loading')) img.setAttribute('loading', 'lazy');
+        img.style.cursor = 'zoom-in';
+        img.onclick = (e) => { e.stopPropagation(); showImageModal(img.src); };
+        // 优雅淡入
+        img.style.opacity = img.style.opacity || '1';
+    });
+    // 3) 外部链接在新标签打开并加 noopener
+    container.querySelectorAll('a').forEach(a => {
+        try {
+            const href = a.getAttribute('href') || '';
+            if (href.startsWith('http') && !href.includes(location.host)) {
+                a.setAttribute('target', '_blank');
+                a.setAttribute('rel', 'noopener noreferrer');
+            }
+        } catch (e) {}
+    });
+
+    // 4) 为代码块添加复制按钮
+    container.querySelectorAll('pre').forEach(pre => {
+        if (pre.querySelector('.copy-code-btn')) return; // 防止重复插入
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'copy-code-btn';
+        btn.setAttribute('aria-label', '复制代码');
+        btn.innerHTML = '复制';
+        btn.onclick = async () => {
+            try {
+                const code = pre.querySelector('code');
+                const text = code ? code.innerText : pre.innerText;
+                await navigator.clipboard.writeText(text);
+                btn.textContent = '已复制';
+                setTimeout(() => btn.textContent = '复制', 1200);
+            } catch (e) {
+                btn.textContent = '复制失败';
+                setTimeout(() => btn.textContent = '复制', 1200);
+            }
+        };
+        pre.style.position = 'relative';
+        pre.appendChild(btn);
+    });
+
+    // 5) 生成简单的 TOC（h1-h3）并插入到文章顶部（若不存在）
+    const article = container.closest('.article-page');
+    if (article) {
+        let toc = article.querySelector('.article-toc');
+        if (!toc) {
+            const headings = container.querySelectorAll('h1,h2,h3');
+            if (headings.length > 1) {
+                toc = document.createElement('nav');
+                toc.className = 'article-toc';
+                let html = '<strong>目录</strong><ul>';
+                headings.forEach(h => {
+                    if (!h.id) h.id = 'h-' + Math.random().toString(36).slice(2,8);
+                    const level = parseInt(h.tagName.substring(1),10);
+                    html += `<li class="toc-level-${level}"><a href="#${h.id}">${h.textContent}</a></li>`;
+                });
+                html += '</ul>';
+                toc.innerHTML = html;
+                article.insertBefore(toc, article.firstChild);
+            }
+        }
+    }
 }
 
 // === Scroll Animation Logic ===
@@ -1068,17 +1213,30 @@ async function globalActionsHandler(e) {
     }
 
     if (e.target.classList.contains('reply-button')) {
-        const parentCommentId = e.target.dataset.commentId;
-        const parentCommentName = e.target.dataset.commentName;
-        openInlineReplyForm(parentCommentId, parentCommentName, e.target.closest('.comment'));
+        // 支持两种 data 属性风格：firebase (data-comment-id / data-comment-name) 和 本地 (data-id / data-name)
+        const parentCommentId = e.target.dataset.commentId || e.target.dataset.id;
+        const parentCommentName = e.target.dataset.commentName || e.target.dataset.name;
+        const closestComment = e.target.closest('.comment');
+        // 如果是本地评论系统（有 data-id），使用 openReplyForm (local)；否则使用 openInlineReplyForm (firebase)
+        if (e.target.dataset.id) {
+            const articleId = document.querySelector('.article-page')?.dataset.articleId;
+            const replyContainer = closestComment ? closestComment.querySelector('.reply-form-container') : null;
+            if (replyContainer && articleId) openReplyForm(articleId, parentCommentId, parentCommentName, replyContainer);
+        } else {
+            openInlineReplyForm(parentCommentId, parentCommentName, closestComment);
+        }
         return;
     }
 
     if (e.target.classList.contains('submit-reply')) {
-        e.preventDefault();
+        // 只拦截带 data-parent-id 的内联回复表单（firebase 实现），否则允许本地表单自己的提交处理
         const form = e.target.closest('.inline-reply-form');
-        if (form) handleInlineReplySubmit(form);
-        return;
+        if (form && form.dataset && form.dataset.parentId) {
+            e.preventDefault();
+            handleInlineReplySubmit(form);
+            return;
+        }
+        // 否则不拦截，让本地表单的 onsubmit 处理继续执行
     }
 
     if (e.target.classList.contains('cancel-reply')) {
@@ -1173,11 +1331,25 @@ async function handleInlineReplySubmit(formElement) {
     const date = new Date().toISOString().split('T')[0];
     const commentId = Date.now().toString();
     const replyComment = { id: commentId, articleId: String(articleId), name, comment: commentText, date, parentId };
-    await saveCommentToFirebase(replyComment);
+    try {
+        const pushId = await saveCommentToFirebase(replyComment);
+        // 临时将新评论加入本地 comments 数组以立即呈现（带 _pushId）
+        replyComment._pushId = pushId;
+        comments.push(replyComment);
+    } catch (err) {
+        console.error('保存回复到 Firebase 失败', err);
+    }
     try {
         localStorage.setItem('commenterName', name);
     } catch (e) {}
     showNotification('回复提交成功', 'success');
+    // 关闭内联回复表单并刷新评论展示
+    closeInlineReplyForm();
+    const hash = window.location.hash;
+    if (hash.startsWith('#article/')) {
+        const articleIdNow = hash.replace('#article/', '');
+        showArticle(articleIdNow);
+    }
 }
 
 // --- 关于页面 ---
@@ -1286,6 +1458,8 @@ function showAuthModal() {
         <button class="auth-modal-close" title="关闭">×</button>
       </div>
     `;
+    // 对渲染后的 Markdown 做增强（高亮、懒加载图、外链处理）
+    try { enhanceRenderedMarkdown(content.querySelector('.article-content')); } catch (e) {}
     document.body.appendChild(modal);
     // 切换tab
     const tabs = modal.querySelectorAll('.auth-tab');
@@ -1385,7 +1559,10 @@ function listenAuthState() {
 // === firebase数据同步部分 ===
 // 保存单条评论到firebase（追加，不覆盖）
 async function saveCommentToFirebase(commentObj) {
-    await db.ref('comments/1744806386348').push(commentObj);
+    // 使用 push() 先获取新的引用，再 set 数据，这样可以拿到 key
+    const ref = db.ref('comments/1744806386348').push();
+    await ref.set(commentObj);
+    return ref.key;
 }
 // 删除单条评论（通过pushId）
 async function deleteCommentFromFirebase(pushId) {
@@ -1457,6 +1634,18 @@ function initialize() {
     initializeBackToTop();
 
     document.addEventListener('click', globalActionsHandler);
+
+    // 委托处理表单提交（捕获回车提交的内联回复表单）
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (form && form.classList && form.classList.contains('inline-reply-form')) {
+            // 仅处理带 data-parent-id 的 firebase 内联表单
+            if (form.dataset && form.dataset.parentId) {
+                e.preventDefault();
+                handleInlineReplySubmit(form);
+            }
+        }
+    });
 
     document.addEventListener('click', (e) => {
         const link = e.target.closest('.article-link');
@@ -1630,126 +1819,5 @@ function renderCommentForm(articleId) {
     };
 }
 
-// 文章详情页集成评论区
-async function showArticle(articleId) {
-    disconnectScrollAnimations();
-    const article = articles.find(a => String(a.id) === String(articleId));
-    if (!article) {
-        showNotification('未找到文章', 'error');
-        window.location.hash = '#home';
-        return;
-    }
-    const content = document.getElementById('content');
-    if (!content) return;
-    // 用 marked.js 渲染 Markdown，并用 DOMPurify 过滤防止 XSS
-    const rawHtml = marked.parse(article.content || '');
-    const contentHtml = DOMPurify.sanitize(rawHtml);
-    content.innerHTML = `
-        <div class="article-page" data-article-id="${articleId}">
-            <h1 class="animate-on-scroll">${article.title || '无题'}</h1>
-            <p class="animate-on-scroll" style="animation-delay:0.1s;">分类: ${article.category || '未分类'} | 日期: ${article.date || '未知'}</p>
-            ${(Array.isArray(article.images) && article.images.length > 0) ? `
-                <div class="gallery animate-on-scroll" style="animation-delay:0.2s;">
-                    ${article.images.length > 1 ? '<button class="prev" title="上一张">◄</button>' : ''}
-                    <img src="${article.images[0]}" alt="${article.title || '文章'} 图片1" onerror="this.alt='图片加载失败';this.style.display='none';">
-                    ${article.images.length > 1 ? '<button class="next" title="下一张">►</button>' : ''}
-                    ${article.images.length > 1 ? `<div class="counter">1/${article.images.length}</div>` : ''}
-                </div>` : ''}
-            <div class="article-content animate-on-scroll" style="animation-delay:0.3s;">${contentHtml}</div>
-            <hr>
-            <h2>评论区</h2>
-            <div class="comments"><p style="text-align:center;color:#888;font-size:14px;">评论加载中...</p></div>
-            <form id="commentForm" novalidate class="animate-on-scroll" style="animation-delay:0.4s;">
-                <h3>发表评论</h3>
-                <label for="commentName">你的名字:</label>
-                <input type="text" id="commentName" placeholder="访客" required>
-                <label for="commentText">评论内容:</label>
-                <textarea id="commentText" placeholder="输入你的评论..." required></textarea>
-                <div class="char-count" id="commentCharCount">0/500</div>
-                <button type="submit">提交评论</button>
-            </form>
-        </div>`;
-    // 初始化评论者名字
-    const commentNameInput = content.querySelector('#commentName');
-    try {
-        const savedName = localStorage.getItem('commenterName');
-        if (savedName && commentNameInput) commentNameInput.value = savedName;
-    } catch (e) {}
-    // 渲染评论
-    renderCommentsForArticle(articleId);
-    // 图库导航
-    const gallery = content.querySelector('.gallery');
-    if (gallery && article.images.length > 1) {
-        let currentIndex = 0;
-        const img = gallery.querySelector('img');
-        const counter = gallery.querySelector('.counter');
-        const prevBtn = gallery.querySelector('.prev');
-        const nextBtn = gallery.querySelector('.next');
-        function updateGallery() {
-            if (img) img.src = article.images[currentIndex];
-            if (counter) counter.textContent = `${currentIndex + 1}/${article.images.length}`;
-        }
-        if (prevBtn) prevBtn.onclick = () => {
-            currentIndex = (currentIndex - 1 + article.images.length) % article.images.length;
-            updateGallery();
-        };
-        if (nextBtn) nextBtn.onclick = () => {
-            currentIndex = (currentIndex + 1) % article.images.length;
-            updateGallery();
-        };
-        if (img) img.onclick = () => showImageModal(article.images[currentIndex]);
-    }
-    // 评论提交
-    const commentForm = content.querySelector('#commentForm');
-    if (commentForm) {
-        commentForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const name = commentNameInput.value.trim();
-            const text = content.querySelector('#commentText').value.trim();
-            if (!name || !text) {
-                showNotification('请填写名字和评论内容', 'error');
-                return;
-            }
-            if (text.length > 500) {
-                showNotification('评论内容不能超过500字符', 'error');
-                return;
-            }
-            const date = new Date().toISOString().split('T')[0];
-            const commentId = Date.now().toString();
-            const newComment = { id: commentId, articleId: String(articleId), name, comment: text, date, parentId: null };
-            await saveCommentToFirebase(newComment);
-            try {
-                localStorage.setItem('commenterName', name);
-            } catch (e) {}
-            showNotification('评论提交成功', 'success');
-            commentForm.reset();
-            commentNameInput.value = name;
-            // 关键：评论提交后刷新整个页面，确保comments数据同步
-            showArticle(articleId);
-        };
-        // 实时字数统计
-        const commentTextArea = content.querySelector('#commentText');
-        const charCountDisplay = content.querySelector('#commentCharCount');
-        if (commentTextArea && charCountDisplay) {
-            commentTextArea.addEventListener('input', () => {
-                const count = commentTextArea.value.length;
-                charCountDisplay.textContent = `${count}/500`;
-                charCountDisplay.style.color = count > 500 ? '#d16060' : 'inherit';
-            });
-        }
-    }
-    // 登录状态检查
-    let canComment = !!currentUser;
-    if (!canComment) {
-        if (commentForm) commentForm.style.display = 'none';
-        const tips = document.createElement('div');
-        tips.className = 'comment-login-tips';
-        tips.innerHTML = '请先<a href="#" id="loginToComment">登录</a>后发表评论';
-        content.appendChild(tips);
-        content.querySelector('#loginToComment').onclick = (e) => {
-            e.preventDefault();
-            showAuthModal();
-        };
-    }
-    initializeScrollAnimations();
-}
+// 已在文件顶部实现 `showArticle`（基于 Firebase 的完整实现），此处保留占位说明以避免重复定义。
+// Duplicate showArticle implementation removed; use the primary implementation earlier in this file.

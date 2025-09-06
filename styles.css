@@ -74,6 +74,10 @@ html.dark-mode {
     z-index: -1; /* 置于内容之下 */
     background-color: var(--color-bg-light);
     transition: background-color var(--transition-normal);
+    /* 不阻塞页面交互，同时允许通过 transform 做轻量视差 */
+    pointer-events: none;
+    transform: translate3d(0,0,0);
+    transition: background-color var(--transition-normal), transform 0.35s cubic-bezier(.22,.9,.2,1);
 }
 
 html.dark-mode #particles-js {
@@ -1111,6 +1115,71 @@ main h1 {
     text-align: justify;
     hyphens: auto;
 }
+
+/* Markdown 内容内的图片与代码块样式增强 */
+.article-content img {
+    display: block;
+    margin: 18px auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.article-content pre {
+    background: #0b1220; /* 与 highlight.js 的暗色主题搭配 */
+    color: #e6eef6;
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow: auto;
+    box-shadow: 0 6px 18px rgba(8,12,20,0.35);
+    margin: 18px 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.article-content pre code {
+    background: transparent;
+    color: inherit;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+}
+
+.article-content code {
+    background: rgba(27,31,35,0.06);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.95em;
+}
+
+/* 复制代码按钮 */
+.copy-code-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s ease, transform 0.12s ease;
+}
+.copy-code-btn:hover { background: rgba(0,0,0,0.8); transform: translateY(-1px); }
+
+/* 目录 */
+.article-toc { margin: 10px 0 18px 0; padding: 12px 16px; background: rgba(240,240,240,0.8); border-radius: 8px; }
+.article-toc strong { display:block; margin-bottom:8px; }
+.article-toc ul { list-style: none; padding-left: 6px; margin: 0; }
+.article-toc li { margin: 6px 0; }
+.article-toc a { color: var(--color-primary-light); text-decoration: none; }
+.article-toc .toc-level-2 { margin-left: 8px; }
+.article-toc .toc-level-3 { margin-left: 16px; font-size: 0.95em; }
+
+/* LQIP / image fade-in */
+.article-content img { opacity: 0; transition: opacity 420ms ease, filter 420ms ease; }
+.article-content img[loading="lazy"] { will-change: opacity; }
+.article-content img[src] { opacity: 1; }
 
 .article-page hr {
     margin: 48px 0; /* 替换 var(--space-xxl) */
