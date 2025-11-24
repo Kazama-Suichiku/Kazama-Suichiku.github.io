@@ -999,7 +999,8 @@ function renderCommentsForArticle(articleId, parentId = null, level = 0, contain
             <small>发表于 ${comment.date || '未知'}</small>
             ${level < MAX_NESTING_LEVEL ? `<button class="reply-button" data-comment-id="${comment.id}" data-comment-name="${comment.name || '匿名'}" title="回复此评论">回复</button>` : ''}
             ${isAdmin() ? `<button class="delete-comment-button" data-comment-id="${comment.id}" title="删除评论">删除</button>` : ''}
-            <div id="reply-form-container-${comment.id}" class="reply-form-container" style="display:none;"></div>`;
+            <div id="reply-form-container-${comment.id}" class="reply-form-container" style="display:none;"></div>
+            <div id="sub-comments-${comment.id}" class="sub-comments"></div>`;
         container.appendChild(div);
         // 关键：为回复按钮绑定事件，弹出内联回复框
         if (level < MAX_NESTING_LEVEL) {
@@ -1010,9 +1011,9 @@ function renderCommentsForArticle(articleId, parentId = null, level = 0, contain
                 };
             }
         }
-        const replyContainer = div.querySelector(`#reply-form-container-${comment.id}`);
+        const subCommentsContainer = div.querySelector(`#sub-comments-${comment.id}`);
         if (level < MAX_NESTING_LEVEL) {
-            renderCommentsForArticle(articleId, comment.id, level + 1, replyContainer);
+            renderCommentsForArticle(articleId, comment.id, level + 1, subCommentsContainer);
         }
     });
     initializeScrollAnimations();
