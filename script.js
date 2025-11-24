@@ -1333,24 +1333,18 @@ async function handleInlineReplySubmit(formElement) {
     const commentId = Date.now().toString();
     const replyComment = { id: commentId, articleId: String(articleId), name, comment: commentText, date, parentId };
     try {
-        const pushId = await saveCommentToFirebase(replyComment);
-        // 临时将新评论加入本地 comments 数组以立即呈现（带 _pushId）
-        replyComment._pushId = pushId;
-        comments.push(replyComment);
+        await saveCommentToFirebase(replyComment);
     } catch (err) {
         console.error('保存回复到 Firebase 失败', err);
+        showNotification('保存回复失败，请重试', 'error');
+        return;
     }
     try {
         localStorage.setItem('commenterName', name);
     } catch (e) {}
     showNotification('回复提交成功', 'success');
-    // 关闭内联回复表单并刷新评论展示
+    // 关闭内联回复表单
     closeInlineReplyForm();
-    const hash = window.location.hash;
-    if (hash.startsWith('#article/')) {
-        const articleIdNow = hash.replace('#article/', '');
-        showArticle(articleIdNow);
-    }
 }
 
 // --- 关于页面 ---
