@@ -179,9 +179,10 @@
     position: fixed;
     top: 100px;
     right: 30px;
-    width: 180px;
+    width: 200px;
     max-height: calc(100vh - 140px);
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 12px 0;
     background: var(--card-background, #fff);
     border-radius: 8px;
@@ -224,9 +225,9 @@ nav.article-toc-fixed li,
     line-height: 1.5;
     border-left: 2px solid transparent;
     transition: all 0.15s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 .article-toc-fixed a:hover {
