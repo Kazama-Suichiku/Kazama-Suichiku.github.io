@@ -3,7 +3,8 @@
  * 支持管理员在线编辑
  */
 
-import { getData, setData, isAdmin } from './firebase.js';
+import { getData, setData, isAdmin, getRef } from './firebase.js';
+import { isUsingProxy } from '../utils/proxy-db.js';
 import notify from './notification.js';
 
 // 默认技能数据
@@ -71,10 +72,24 @@ export async function getSkills() {
 
 /**
  * 保存技能数据
+ * 注意：写入操作需要认证，代理模式下会尝试直连 Firebase
  */
 export async function saveSkills(data) {
     try {
-        await setData('skills', data);
+        // 如果在代理模式下，尝试直连 Firebase 进行写入（需要科学上网）
+        if (isUsingProxy()) {
+            try {
+                // 直接使用 Firebase SDK 写入
+                await getRef('skills').set(data);
+            } catch (directError) {
+                console.error('直连写入失败，可能需要科学上网:', directError);
+                notify.error('保存失败：写入操作需要科学上网');
+                return false;
+            }
+        } else {
+            await setData('skills', data);
+        }
+        
         skillsData = data;
         notify.success('技能数据保存成功');
         return true;

@@ -3,7 +3,8 @@
  * 展示学习/工作经历，支持管理员编辑
  */
 
-import { getData, setData, isAdmin } from './firebase.js';
+import { getData, setData, isAdmin, getRef } from './firebase.js';
+import { isUsingProxy } from '../utils/proxy-db.js';
 import notify from './notification.js';
 
 // 默认时间线数据
@@ -71,10 +72,24 @@ export async function getTimeline() {
 
 /**
  * 保存时间线数据
+ * 注意：写入操作需要认证，代理模式下会尝试直连 Firebase
  */
 export async function saveTimeline(data) {
     try {
-        await setData('timeline', data);
+        // 如果在代理模式下，尝试直连 Firebase 进行写入（需要科学上网）
+        if (isUsingProxy()) {
+            try {
+                // 直接使用 Firebase SDK 写入
+                await getRef('timeline').set(data);
+            } catch (directError) {
+                console.error('直连写入失败，可能需要科学上网:', directError);
+                notify.error('保存失败：写入操作需要科学上网');
+                return false;
+            }
+        } else {
+            await setData('timeline', data);
+        }
+        
         timelineData = data;
         notify.success('时间线保存成功');
         return true;
