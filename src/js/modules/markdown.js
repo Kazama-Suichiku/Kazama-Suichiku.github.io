@@ -156,18 +156,92 @@ function generateTOC(container) {
     toc = document.createElement('nav');
     toc.className = 'article-toc';
     
-    let html = '<strong>目录</strong><ul>';
-    headings.forEach(h => {
-        if (!h.id) {
-            h.id = 'h-' + Math.random().toString(36).slice(2, 8);
-        }
+    let html = '<strong>📑 目录</strong><ul>';
+    headings.forEach((h, index) => {
+        // 生成唯一且稳定的 ID
+        const headingId = 'heading-' + index + '-' + h.textContent.replace(/\s+/g, '-').substring(0, 20);
+        h.id = headingId;
         const level = parseInt(h.tagName.substring(1), 10);
-        html += `<li class="toc-level-${level}"><a href="#${h.id}">${h.textContent}</a></li>`;
+        html += `<li class="toc-level-${level}"><a href="javascript:void(0)" data-target="${headingId}">${h.textContent}</a></li>`;
     });
     html += '</ul>';
     
     toc.innerHTML = html;
+    
+    // 绑定点击事件 - 平滑滚动到目标位置
+    toc.querySelectorAll('a[data-target]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const targetId = link.getAttribute('data-target');
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                // 计算滚动位置，考虑固定 header 的高度
+                const headerHeight = 80;
+                const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - headerHeight;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // 更新当前激活的目录项
+                toc.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    // 滚动时高亮当前章节
+    setupTOCHighlight(toc, headings);
+    
     article.insertBefore(toc, article.firstChild);
+}
+
+/**
+ * 设置目录滚动高亮
+ * @param {HTMLElement} toc - 目录元素
+ * @param {NodeList} headings - 标题元素列表
+ */
+function setupTOCHighlight(toc, headings) {
+    let ticking = false;
+    
+    const updateHighlight = () => {
+        const headerHeight = 100;
+        let currentHeading = null;
+        
+        headings.forEach(heading => {
+            const rect = heading.getBoundingClientRect();
+            if (rect.top <= headerHeight + 50) {
+                currentHeading = heading;
+            }
+        });
+        
+        if (currentHeading) {
+            toc.querySelectorAll('a').forEach(a => {
+                if (a.getAttribute('data-target') === currentHeading.id) {
+                    a.classList.add('active');
+                } else {
+                    a.classList.remove('active');
+                }
+            });
+        }
+    };
+    
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                updateHighlight();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+    
+    // 初始高亮
+    setTimeout(updateHighlight, 100);
 }
 
 export default {

@@ -57,12 +57,13 @@
     position: fixed;
     top: 0;
     left: 0;
-    height: 3px;
+    height: 4px;
     width: 0;
-    background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
-    z-index: 10001;
+    background: linear-gradient(90deg, var(--accent-color, #5a7d9a), var(--secondary-color, #c89b70));
+    z-index: 99999;
     transition: width 0.1s ease-out;
-    box-shadow: 0 0 10px var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color, #5a7d9a);
+    display: none; /* 默认隐藏，由 JS 控制显示 */
 }
 
 /* 页面切换过渡 */
