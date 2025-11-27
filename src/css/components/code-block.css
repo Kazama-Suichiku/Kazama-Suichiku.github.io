@@ -1,21 +1,79 @@
 /**
- * 代码块增强样式
+ * 代码块统一样式
+ * 覆盖 Highlight.js 默认样式，提供一致的代码块外观
  */
 
-/* ==================== 代码块包装器 ==================== */
+/* ==================== 基础代码块样式（未增强前） ==================== */
+
+/* 覆盖所有 pre 和 code 的默认样式 */
+.article-content pre,
+.markdown-body pre {
+    margin: 1.5em 0;
+    padding: 0;
+    background: #f8f9fa !important;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.article-content pre code,
+.markdown-body pre code {
+    display: block;
+    padding: 16px !important;
+    background: transparent !important;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+    color: #24292e;
+}
+
+/* 行内代码 */
+.article-content code:not(pre code),
+.markdown-body code:not(pre code) {
+    padding: 2px 6px;
+    background: rgba(90, 125, 154, 0.1);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+    color: #c7254e;
+}
+
+/* 深色模式基础样式 */
+body.dark-mode .article-content pre,
+body.dark-mode .markdown-body pre {
+    background: #1a1a2e !important;
+    border-color: #2d2d44;
+}
+
+body.dark-mode .article-content pre code,
+body.dark-mode .markdown-body pre code {
+    color: #e4e4e7;
+}
+
+body.dark-mode .article-content code:not(pre code),
+body.dark-mode .markdown-body code:not(pre code) {
+    background: rgba(146, 193, 222, 0.15);
+    color: #f8b4c4;
+}
+
+/* ==================== 增强后的代码块样式 ==================== */
 
 .code-block-wrapper {
     position: relative;
     margin: 1.5em 0;
     border-radius: 8px;
     overflow: hidden;
-    background: #f6f8fa;
-    border: 1px solid var(--color-border-light);
+    background: #1a1a2e;
+    border: 1px solid #2d2d44;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-body.dark-mode .code-block-wrapper {
-    background: #1e1e1e;
-    border-color: var(--color-border-dark);
+/* 浅色模式 */
+body:not(.dark-mode) .code-block-wrapper {
+    background: #fafbfc;
+    border-color: #e1e4e8;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* ==================== 代码块头部 ==================== */
@@ -24,70 +82,77 @@ body.dark-mode .code-block-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    background: #e9ecef;
-    border-bottom: 1px solid var(--color-border-light);
-    font-size: 12px;
+    padding: 10px 14px;
+    background: #252542;
+    border-bottom: 1px solid #2d2d44;
 }
 
-body.dark-mode .code-block-header {
-    background: #2d2d2d;
-    border-bottom-color: #404040;
+body:not(.dark-mode) .code-block-header {
+    background: #f1f3f5;
+    border-bottom-color: #e1e4e8;
 }
 
 /* 语言标签 */
 .code-language {
-    color: var(--color-text-muted-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #8b8ba7;
     font-weight: 600;
-    text-transform: uppercase;
+    font-size: 12px;
     letter-spacing: 0.5px;
-    font-size: 11px;
 }
 
-body.dark-mode .code-language {
-    color: var(--color-text-muted-dark);
+.code-language::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #5a7d9a;
+}
+
+body:not(.dark-mode) .code-language {
+    color: #6a737d;
 }
 
 /* 复制按钮 */
 .code-copy-btn {
     display: flex;
     align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    background: transparent;
-    border: 1px solid var(--color-border-light);
-    border-radius: 4px;
-    color: var(--color-text-muted-light);
+    gap: 6px;
+    padding: 5px 12px;
+    background: rgba(90, 125, 154, 0.2);
+    border: none;
+    border-radius: 5px;
+    color: #8b8ba7;
     cursor: pointer;
     font-size: 12px;
+    font-weight: 500;
     transition: all 0.2s ease;
 }
 
 .code-copy-btn:hover {
-    background: var(--color-accent-light);
-    border-color: var(--color-accent-light);
+    background: #5a7d9a;
     color: white;
 }
 
 .code-copy-btn.copied {
     background: #28a745;
-    border-color: #28a745;
     color: white;
 }
 
-body.dark-mode .code-copy-btn {
-    border-color: #404040;
-    color: var(--color-text-muted-dark);
+body:not(.dark-mode) .code-copy-btn {
+    background: rgba(90, 125, 154, 0.1);
+    color: #6a737d;
 }
 
-body.dark-mode .code-copy-btn:hover {
-    background: var(--color-accent-dark);
-    border-color: var(--color-accent-dark);
-    color: #1e1e1e;
+body:not(.dark-mode) .code-copy-btn:hover {
+    background: #5a7d9a;
+    color: white;
 }
 
 .code-copy-btn i {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .code-copy-btn span {
@@ -97,63 +162,180 @@ body.dark-mode .code-copy-btn:hover {
 /* ==================== 代码块主体 ==================== */
 
 .code-block-wrapper pre {
-    margin: 0;
-    padding: 16px;
+    margin: 0 !important;
+    padding: 16px !important;
     overflow-x: auto;
     background: transparent !important;
     border: none !important;
-    border-radius: 0;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 .code-block-wrapper pre code {
+    display: block;
     background: transparent !important;
     padding: 0 !important;
-    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
-    font-size: 14px;
-    line-height: 1.6;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #e4e4e7;
+    tab-size: 4;
+}
+
+body:not(.dark-mode) .code-block-wrapper pre code {
+    color: #24292e;
+}
+
+/* ==================== 语法高亮颜色（深色主题） ==================== */
+
+/* 关键字 */
+.code-block-wrapper .hljs-keyword,
+.code-block-wrapper .hljs-selector-tag,
+.code-block-wrapper .hljs-built_in,
+.code-block-wrapper .hljs-name {
+    color: #c678dd;
+}
+
+/* 字符串 */
+.code-block-wrapper .hljs-string,
+.code-block-wrapper .hljs-attr,
+.code-block-wrapper .hljs-symbol,
+.code-block-wrapper .hljs-bullet {
+    color: #98c379;
+}
+
+/* 数字 */
+.code-block-wrapper .hljs-number,
+.code-block-wrapper .hljs-literal {
+    color: #d19a66;
+}
+
+/* 注释 */
+.code-block-wrapper .hljs-comment,
+.code-block-wrapper .hljs-quote {
+    color: #5c6370;
+    font-style: italic;
+}
+
+/* 函数 */
+.code-block-wrapper .hljs-title,
+.code-block-wrapper .hljs-section {
+    color: #61afef;
+}
+
+/* 类型 */
+.code-block-wrapper .hljs-type,
+.code-block-wrapper .hljs-class {
+    color: #e5c07b;
+}
+
+/* 变量 */
+.code-block-wrapper .hljs-variable,
+.code-block-wrapper .hljs-template-variable {
+    color: #e06c75;
+}
+
+/* 属性 */
+.code-block-wrapper .hljs-attribute {
+    color: #d19a66;
+}
+
+/* 标签 */
+.code-block-wrapper .hljs-tag {
+    color: #e06c75;
+}
+
+/* 正则 */
+.code-block-wrapper .hljs-regexp {
+    color: #56b6c2;
+}
+
+/* ==================== 语法高亮颜色（浅色主题） ==================== */
+
+body:not(.dark-mode) .code-block-wrapper .hljs-keyword,
+body:not(.dark-mode) .code-block-wrapper .hljs-selector-tag,
+body:not(.dark-mode) .code-block-wrapper .hljs-built_in,
+body:not(.dark-mode) .code-block-wrapper .hljs-name {
+    color: #d73a49;
+}
+
+body:not(.dark-mode) .code-block-wrapper .hljs-string,
+body:not(.dark-mode) .code-block-wrapper .hljs-attr,
+body:not(.dark-mode) .code-block-wrapper .hljs-symbol,
+body:not(.dark-mode) .code-block-wrapper .hljs-bullet {
+    color: #22863a;
+}
+
+body:not(.dark-mode) .code-block-wrapper .hljs-number,
+body:not(.dark-mode) .code-block-wrapper .hljs-literal {
+    color: #005cc5;
+}
+
+body:not(.dark-mode) .code-block-wrapper .hljs-comment,
+body:not(.dark-mode) .code-block-wrapper .hljs-quote {
+    color: #6a737d;
+    font-style: italic;
+}
+
+body:not(.dark-mode) .code-block-wrapper .hljs-title,
+body:not(.dark-mode) .code-block-wrapper .hljs-section {
+    color: #6f42c1;
+}
+
+body:not(.dark-mode) .code-block-wrapper .hljs-type,
+body:not(.dark-mode) .code-block-wrapper .hljs-class {
+    color: #e36209;
+}
+
+body:not(.dark-mode) .code-block-wrapper .hljs-variable,
+body:not(.dark-mode) .code-block-wrapper .hljs-template-variable {
+    color: #e36209;
+}
+
+body:not(.dark-mode) .code-block-wrapper .hljs-tag {
+    color: #22863a;
 }
 
 /* ==================== 行号 ==================== */
 
 .code-block-wrapper pre.has-line-numbers {
     display: flex;
-    padding: 0;
+    padding: 0 !important;
 }
 
 .line-numbers {
     display: flex;
     flex-direction: column;
     padding: 16px 0;
-    background: rgba(0, 0, 0, 0.03);
-    border-right: 1px solid var(--color-border-light);
+    background: rgba(0, 0, 0, 0.2);
+    border-right: 1px solid #2d2d44;
     user-select: none;
     text-align: right;
-    min-width: 40px;
+    min-width: 44px;
     flex-shrink: 0;
 }
 
-body.dark-mode .line-numbers {
-    background: rgba(255, 255, 255, 0.03);
-    border-right-color: #404040;
+body:not(.dark-mode) .line-numbers {
+    background: rgba(0, 0, 0, 0.03);
+    border-right-color: #e1e4e8;
 }
 
 .line-numbers span {
     display: block;
     padding: 0 12px;
-    color: var(--color-text-muted-light);
-    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    opacity: 0.6;
+    color: #5c6370;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.7;
 }
 
-body.dark-mode .line-numbers span {
-    color: var(--color-text-muted-dark);
+body:not(.dark-mode) .line-numbers span {
+    color: #959da5;
 }
 
 .code-block-wrapper pre.has-line-numbers code {
     flex: 1;
-    padding: 16px;
+    padding: 16px !important;
     overflow-x: auto;
 }
 
@@ -161,27 +343,29 @@ body.dark-mode .line-numbers span {
 
 .code-block-wrapper pre::-webkit-scrollbar {
     height: 8px;
+    width: 8px;
 }
 
 .code-block-wrapper pre::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
 }
 
 .code-block-wrapper pre::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 4px;
 }
 
 .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.25);
 }
 
-body.dark-mode .code-block-wrapper pre::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+body:not(.dark-mode) .code-block-wrapper pre::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
 }
 
-body.dark-mode .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+body:not(.dark-mode) .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
 }
 
 /* ==================== 响应式 ==================== */
@@ -195,7 +379,7 @@ body.dark-mode .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
     }
     
     .code-block-header {
-        padding: 6px 10px;
+        padding: 8px 12px;
     }
     
     .code-copy-btn span {
@@ -203,27 +387,30 @@ body.dark-mode .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
     }
     
     .code-block-wrapper pre code {
-        font-size: 13px;
+        font-size: 12px;
     }
     
     .line-numbers {
-        min-width: 32px;
+        min-width: 36px;
     }
     
     .line-numbers span {
         padding: 0 8px;
-        font-size: 12px;
+        font-size: 11px;
     }
 }
 
-/* ==================== 阅读模式下的代码块 ==================== */
+/* ==================== 阅读模式 ==================== */
 
 body.reading-mode .code-block-wrapper {
     margin: 1.5em 0;
     border-radius: 8px;
 }
 
-body.reading-mode .code-block-header {
-    display: flex;
-}
+/* ==================== 隐藏 Highlight.js 默认主题的干扰 ==================== */
 
+/* 确保增强后的代码块不受外部样式影响 */
+.code-block-wrapper .hljs {
+    background: transparent !important;
+    padding: 0 !important;
+}
