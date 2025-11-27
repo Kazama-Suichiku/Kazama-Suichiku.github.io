@@ -13,6 +13,13 @@ import { updateAuthHeaderUI, showAuthModal } from './modules/modal.js';
 import { initMarkdown } from './modules/markdown.js';
 import { registerRoute, setDefaultRoute, initRouter, navigate } from './modules/router.js';
 
+// 新增优化模块
+import { setupGlobalErrorHandler } from './utils/error-handler.js';
+import { initStorage } from './utils/storage.js';
+import { createGlobalLoader, initReadingProgress, toggleReadingProgress } from './modules/loading.js';
+import { initMobileNav } from './modules/mobile-nav.js';
+import { initSEO, updateHomeSEO, updateArticleSEO, updateAboutSEO } from './modules/seo.js';
+
 // 页面模块
 import { showHome, setArticles, updateArticles, handleDeleteArticle, handlePageChange, getArticles } from './pages/home.js';
 import { showArticle, setComments, handleDeleteComment } from './pages/article.js';
@@ -20,15 +27,36 @@ import { showEditForm } from './pages/edit.js';
 import { showAbout } from './pages/about.js';
 
 /**
- * 初始化路由
+ * 初始化路由（带 SEO 更新）
  */
 function setupRoutes() {
     setDefaultRoute('home');
     
-    registerRoute('home', showHome);
-    registerRoute('article', showArticle);
-    registerRoute('edit', showEditForm);
-    registerRoute('about', showAbout);
+    // 包装路由处理函数，添加 SEO 更新
+    registerRoute('home', async () => {
+        updateHomeSEO();
+        toggleReadingProgress(false);
+        await showHome();
+    });
+    
+    registerRoute('article', async (id) => {
+        toggleReadingProgress(true);
+        const article = await showArticle(id);
+        if (article) {
+            updateArticleSEO(article);
+        }
+    });
+    
+    registerRoute('edit', async (id) => {
+        toggleReadingProgress(false);
+        await showEditForm(id);
+    });
+    
+    registerRoute('about', () => {
+        updateAboutSEO();
+        toggleReadingProgress(false);
+        showAbout();
+    });
 }
 
 /**
@@ -149,12 +177,18 @@ function setupAuthListener() {
  * 初始化应用
  */
 function initialize() {
+    // 设置全局错误处理
+    setupGlobalErrorHandler();
+    
     // 设置年份
     const yearSpan = $('#currentYear');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
     
     // 初始化 Firebase
     initFirebase();
+    
+    // 初始化 Firebase Storage
+    initStorage();
     
     // 初始化主题
     initializeTheme();
@@ -168,6 +202,18 @@ function initialize() {
     // 初始化头像上传
     initAvatarUpload();
     loadAvatar();
+    
+    // 初始化 SEO
+    initSEO();
+    
+    // 创建全局加载器
+    createGlobalLoader();
+    
+    // 初始化阅读进度条
+    initReadingProgress();
+    
+    // 初始化移动端导航
+    initMobileNav();
     
     // 设置路由
     setupRoutes();
@@ -187,7 +233,7 @@ function initialize() {
     // 设置认证监听
     setupAuthListener();
     
-    console.log('应用初始化完成');
+    console.log('🎋 翠竹的博客 - 应用初始化完成');
 }
 
 // 页面加载时初始化

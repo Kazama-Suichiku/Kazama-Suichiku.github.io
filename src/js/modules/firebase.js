@@ -65,6 +65,46 @@ export function isAdmin() {
 }
 
 /**
+ * 异步验证管理员身份（更安全的验证方式）
+ * 可以在服务端使用 Firebase Custom Claims 进一步增强
+ * @returns {Promise<boolean>}
+ */
+export async function verifyAdmin() {
+    if (!currentUser) return false;
+    
+    // 基础验证：邮箱匹配
+    if (currentUser.email !== ADMIN_CONFIG.email) return false;
+    
+    // 验证邮箱是否已验证（可选的额外安全层）
+    // if (!currentUser.emailVerified) return false;
+    
+    // 如果使用 Custom Claims，可以这样验证：
+    // try {
+    //     const idTokenResult = await currentUser.getIdTokenResult();
+    //     return idTokenResult.claims.admin === true;
+    // } catch (error) {
+    //     console.error('验证管理员失败:', error);
+    //     return false;
+    // }
+    
+    return true;
+}
+
+/**
+ * 获取用户 ID Token（用于后端验证）
+ * @returns {Promise<string|null>}
+ */
+export async function getIdToken() {
+    if (!currentUser) return null;
+    try {
+        return await currentUser.getIdToken();
+    } catch (error) {
+        console.error('获取 ID Token 失败:', error);
+        return null;
+    }
+}
+
+/**
  * 注册认证状态变化回调
  * @param {Function} callback - 回调函数
  */

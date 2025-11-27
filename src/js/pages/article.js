@@ -11,6 +11,8 @@ import { showImageModal, showAuthModal } from '../modules/modal.js';
 import { renderMarkdown, enhanceRenderedMarkdown } from '../modules/markdown.js';
 import notify from '../modules/notification.js';
 import { getArticles } from './home.js';
+import { getLimiter } from '../utils/rate-limiter.js';
+import { setButtonLoading } from '../modules/loading.js';
 
 // 评论数据
 let comments = [];
@@ -207,6 +209,14 @@ async function handleInlineReplySubmit(form) {
         return;
     }
     
+    // 检查速率限制
+    const limiter = getLimiter('comment');
+    const rateCheck = limiter.check();
+    if (!rateCheck.allowed) {
+        notify.error(rateCheck.message);
+        return;
+    }
+    
     const replyComment = {
         id: generateId(),
         articleId: String(articleId),
@@ -216,14 +226,20 @@ async function handleInlineReplySubmit(form) {
         parentId
     };
     
+    const submitBtn = form.querySelector('.submit-reply');
+    
     try {
+        setButtonLoading(submitBtn, true, '提交中...');
         await saveComment(replyComment);
+        limiter.record(); // 记录请求
         setStorage('commenterName', name);
         notify.success('回复提交成功');
         closeInlineReplyForm();
     } catch (err) {
         console.error('保存回复失败', err);
         notify.error('保存回复失败，请重试');
+    } finally {
+        setButtonLoading(submitBtn, false);
     }
 }
 
@@ -260,6 +276,7 @@ export async function handleDeleteComment(commentId, pushId, articleId) {
 /**
  * 显示文章详情页
  * @param {string} articleId - 文章 ID
+ * @returns {Object|null} - 返回文章对象供 SEO 使用
  */
 export function showArticle(articleId) {
     disconnectScrollAnimations();
@@ -270,7 +287,7 @@ export function showArticle(articleId) {
     if (!article) {
         notify.error('未找到文章');
         window.location.hash = '#home';
-        return;
+        return null;
     }
     
     const content = $('#content');
@@ -344,6 +361,9 @@ export function showArticle(articleId) {
     }
     
     initScrollAnimations();
+    
+    // 返回文章对象供 SEO 使用
+    return article;
 }
 
 /**
@@ -423,6 +443,14 @@ function initCommentForm(articleId) {
             return;
         }
         
+        // 检查速率限制
+        const limiter = getLimiter('comment');
+        const rateCheck = limiter.check();
+        if (!rateCheck.allowed) {
+            notify.error(rateCheck.message);
+            return;
+        }
+        
         const newComment = {
             id: generateId(),
             articleId: String(articleId),
@@ -432,8 +460,12 @@ function initCommentForm(articleId) {
             parentId: null
         };
         
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
         try {
+            setButtonLoading(submitBtn, true, '提交中...');
             await saveComment(newComment);
+            limiter.record(); // 记录请求
             setStorage('commenterName', name);
             notify.success('评论提交成功');
             form.reset();
@@ -441,6 +473,8 @@ function initCommentForm(articleId) {
             if (charCount) charCount.textContent = `0/${COMMENT_CONFIG.maxLength}`;
         } catch (err) {
             notify.error('评论提交失败，请重试');
+        } finally {
+            setButtonLoading(submitBtn, false);
         }
     };
 }

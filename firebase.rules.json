@@ -1,0 +1,35 @@
+{
+  "rules": {
+    "articles": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email == '3196968430@qq.com'",
+      "$articleId": {
+        ".validate": "newData.hasChildren(['title', 'content', 'category', 'date'])"
+      }
+    },
+    "comments": {
+      ".read": true,
+      "$commentPath": {
+        ".read": true,
+        ".write": "auth != null",
+        "$commentId": {
+          ".validate": "newData.hasChildren(['name', 'comment', 'date', 'articleId'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 50"
+          },
+          "comment": {
+            ".validate": "newData.isString() && newData.val().length <= 500"
+          }
+        }
+      }
+    },
+    "avatars": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid == $uid",
+        ".validate": "newData.isString() && newData.val().length <= 500000"
+      }
+    }
+  }
+}
+

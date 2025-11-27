@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面未找到 - 翠竹的博客</title>
+    <meta name="robots" content="noindex">
+    <style>
+        :root {
+            --accent-color: #5a7d9a;
+            --secondary-color: #c89b70;
+            --text-color: #333;
+            --text-muted: #666;
+            --background-color: #f8f6f3;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --accent-color: #92c1de;
+                --secondary-color: #d8b593;
+                --text-color: #e0e0e0;
+                --text-muted: #a0a0a0;
+                --background-color: #1e232d;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Serif SC', 'Source Han Serif CN', serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 6rem;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+        
+        .error-code {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 400px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(90, 125, 154, 0.3);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(90, 125, 154, 0.4);
+        }
+        
+        .links {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        
+        .links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .bamboo-bg {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            font-size: 15rem;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="bamboo-bg">🎋</div>
+    
+    <div class="error-icon">🍂</div>
+    <h1>迷路了...</h1>
+    <p class="error-code">404 Not Found</p>
+    <p>你访问的页面似乎已经飘落在风中，或者从未存在过。让我们回到熟悉的地方吧。</p>
+    
+    <a href="/" class="back-btn">
+        <span>🏠</span>
+        <span>返回首页</span>
+    </a>
+    
+    <div class="links">
+        <a href="/#home">文章列表</a>
+        <a href="/#about">关于我</a>
+        <a href="https://github.com/Kazama-Suichiku" target="_blank">GitHub</a>
+    </div>
+    
+    <script>
+        // GitHub Pages SPA 重定向支持
+        // 如果是 SPA 路由，重定向到首页并带上路径
+        (function() {
+            var path = window.location.pathname;
+            if (path !== '/' && path !== '/index.html' && path !== '/404.html') {
+                // 将路径转换为 hash 路由
+                var hash = path.replace(/^\//, '').replace(/\.html$/, '');
+                window.location.replace('/#' + hash);
+            }
+        })();
+    </script>
+</body>
+</html>
+

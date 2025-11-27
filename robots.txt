@@ -1,0 +1,12 @@
+# Robots.txt for 翠竹的博客
+# https://kazama-suichiku.github.io
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://kazama-suichiku.github.io/sitemap.xml
+
+# 不索引的路径
+Disallow: /404.html
+

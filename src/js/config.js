@@ -80,6 +80,38 @@ export const PROFILE_CONFIG = {
 // 站点信息
 export const SITE_CONFIG = {
     title: '翠竹的博客',
-    icon: '🎋'
+    icon: '🎋',
+    description: '游戏技术美术爱好者的个人博客，分享学习历程，记录点滴思考。',
+    keywords: '博客,技术美术,游戏开发,Shader,Unity,Unreal,学习笔记',
+    themeColor: '#5a7d9a'
+};
+
+// 速率限制配置
+export const RATE_LIMIT_CONFIG = {
+    comment: {
+        maxRequests: 3,
+        windowMs: 60000,      // 1分钟
+        blockDuration: 300000  // 5分钟
+    },
+    login: {
+        maxRequests: 5,
+        windowMs: 60000,
+        blockDuration: 600000  // 10分钟
+    },
+    article: {
+        maxRequests: 10,
+        windowMs: 3600000,     // 1小时
+        blockDuration: 1800000 // 30分钟
+    }
+};
+
+// 动画配置
+export const ANIMATION_CONFIG = {
+    pageTransitionDuration: 300,
+    scrollAnimationThreshold: 0.1,
+    skeletonCount: {
+        articleList: 3,
+        comments: 2
+    }
 };
 

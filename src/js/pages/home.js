@@ -5,12 +5,14 @@
 
 import { $, setHTML } from '../utils/dom.js';
 import { highlightText, truncate, escapeHtml, debounce } from '../utils/helpers.js';
-import { CATEGORIES, PAGINATION } from '../config.js';
+import { CATEGORIES, PAGINATION, ANIMATION_CONFIG } from '../config.js';
 import { isAdmin, onArticlesChange, deleteArticle, saveArticle } from '../modules/firebase.js';
 import { initScrollAnimations, disconnectScrollAnimations } from '../modules/scroll.js';
 import { showImageModal } from '../modules/modal.js';
 import notify from '../modules/notification.js';
 import { compressImage } from '../utils/image.js';
+import { showSkeleton } from '../modules/loading.js';
+import { getLimiter } from '../utils/rate-limiter.js';
 
 // 文章数据
 let articles = [];
