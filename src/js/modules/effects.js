@@ -278,7 +278,8 @@ export function destroyParallax() {
 export function initAllEffects() {
     initTypewriterBio();
     initMouseGlow();
-    initParallax();
+    // 视差滚动效果已禁用（用户反馈不好看）
+    // initParallax();
     
     // 3D 卡片效果在文章列表渲染后调用
 }
