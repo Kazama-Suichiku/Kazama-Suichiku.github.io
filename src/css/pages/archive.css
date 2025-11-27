@@ -1,0 +1,178 @@
+/**
+ * 文章归档页样式
+ */
+
+.archive-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.archive-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.archive-summary {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    font-size: 0.95rem;
+}
+
+.archive-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.archive-timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent-color), var(--secondary-color));
+    border-radius: 1px;
+}
+
+.archive-group {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.archive-group::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    border: 3px solid var(--background-color);
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.archive-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.archive-year {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.archive-month {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.archive-count {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+.archive-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.archive-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    transition: background 0.2s;
+}
+
+.archive-item:hover {
+    background: rgba(var(--accent-rgb, 90, 125, 154), 0.05);
+    margin: 0 -0.5rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 4px;
+}
+
+.archive-day {
+    min-width: 28px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono, monospace);
+}
+
+.archive-link {
+    flex: 1;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.archive-link:hover {
+    color: var(--accent-color);
+}
+
+.archive-category {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    background: rgba(var(--accent-rgb, 90, 125, 154), 0.1);
+    color: var(--accent-color);
+    border-radius: 10px;
+}
+
+/* 深色模式 */
+:root.dark-mode .archive-item {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+:root.dark-mode .archive-item:hover {
+    background: rgba(146, 193, 222, 0.08);
+}
+
+:root.dark-mode .archive-group::before {
+    border-color: var(--background-color);
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+    .archive-timeline {
+        padding-left: 20px;
+    }
+    
+    .archive-timeline::before {
+        left: 4px;
+    }
+    
+    .archive-group::before {
+        left: -20px;
+        width: 10px;
+        height: 10px;
+    }
+    
+    .archive-header {
+        flex-wrap: wrap;
+    }
+    
+    .archive-item {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .archive-category {
+        order: 3;
+        margin-left: 38px;
+    }
+}
+

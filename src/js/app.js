@@ -25,6 +25,10 @@ import { showHome, setArticles, updateArticles, handleDeleteArticle, handlePageC
 import { showArticle, setComments, handleDeleteComment } from './pages/article.js';
 import { showEditForm } from './pages/edit.js';
 import { showAbout } from './pages/about.js';
+import { showArchive } from './pages/archive.js';
+
+// 新功能模块
+import { initGitHubContrib } from './modules/github-contrib.js';
 
 /**
  * 初始化路由（带 SEO 更新）
@@ -56,6 +60,11 @@ function setupRoutes() {
         updateAboutSEO();
         toggleReadingProgress(false);
         showAbout();
+    });
+    
+    registerRoute('archive', () => {
+        toggleReadingProgress(false);
+        showArchive();
     });
 }
 
@@ -214,6 +223,9 @@ function initialize() {
     
     // 初始化移动端导航
     initMobileNav();
+    
+    // 初始化 GitHub 贡献图
+    setTimeout(initGitHubContrib, 500);
     
     // 设置路由
     setupRoutes();

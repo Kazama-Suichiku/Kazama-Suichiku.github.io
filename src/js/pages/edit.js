@@ -3,7 +3,7 @@
  */
 
 import { $ } from '../utils/dom.js';
-import { escapeHtml, formatDate } from '../utils/helpers.js';
+import { escapeHtml, formatDate, generateId } from '../utils/helpers.js';
 import { CATEGORIES, IMAGE_CONFIG } from '../config.js';
 import { isAdmin, saveArticle } from '../modules/firebase.js';
 import { initScrollAnimations, disconnectScrollAnimations } from '../modules/scroll.js';
@@ -11,6 +11,7 @@ import { showImageModal } from '../modules/modal.js';
 import notify from '../modules/notification.js';
 import { compressImage } from '../utils/image.js';
 import { getArticles } from './home.js';
+import { extractTags, parseTagInput } from '../modules/tags.js';
 
 // EasyMDE 编辑器实例
 let easyMDEInstance = null;
@@ -55,32 +56,88 @@ export function showEditForm(articleId) {
     // 销毁旧的编辑器
     destroyEasyMDE();
     
+    // 获取常用标签
+    const allArticles = getArticles();
+    const suggestedTags = extractTags(allArticles);
+    const currentTags = article.tags || [];
+    
     content.innerHTML = `
-        <div class="animate-on-scroll">
+        <div class="edit-page animate-on-scroll">
             <h1>编辑文章</h1>
             <form id="editArticleForm" class="edit-article-form" novalidate>
-                <label for="articleTitle">标题:</label>
-                <input type="text" id="articleTitle" value="${escapeHtml(article.title || '')}" required>
-                <label for="articleCategory">分类:</label>
-                <select id="articleCategory" required>
-                    ${CATEGORIES.map(cat => `
-                        <option value="${cat}" ${cat === article.category ? 'selected' : ''}>${cat}</option>
-                    `).join('')}
-                </select>
-                <label for="articleContent">内容:</label>
-                <textarea id="articleContent" required>${escapeHtml(article.content || '')}</textarea>
-                <div style="margin:8px 0 16px 0;">
+                <div class="form-row">
+                    <div class="form-group flex-2">
+                        <label for="articleTitle">标题</label>
+                        <input type="text" id="articleTitle" value="${escapeHtml(article.title || '')}" placeholder="请输入文章标题" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="articleCategory">分类</label>
+                        <select id="articleCategory" required>
+                            ${CATEGORIES.map(cat => `
+                                <option value="${cat}" ${cat === article.category ? 'selected' : ''}>${cat}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="articleTags">标签</label>
+                    <input type="text" id="articleTags" value="${escapeHtml(currentTags.join(', '))}" 
+                           placeholder="输入标签，用逗号分隔（如：Unity, Shader, 教程）">
+                    <div class="tag-suggestions">
+                        ${suggestedTags.length > 0 ? `
+                            <span class="suggestion-label">常用：</span>
+                            ${suggestedTags.slice(0, 8).map(t => `
+                                <button type="button" class="tag-suggestion" data-tag="${escapeHtml(t.name)}">${escapeHtml(t.name)}</button>
+                            `).join('')}
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="articleContent">
+                        内容
+                        <span class="label-hint">支持 Markdown 语法</span>
+                    </label>
+                    <textarea id="articleContent" required>${escapeHtml(article.content || '')}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        封面图片
+                        <span class="label-hint">最多 ${IMAGE_CONFIG.article.maxCount} 张，支持拖拽上传</span>
+                    </label>
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <input type="file" id="articleImage" accept="image/jpeg,image/png" multiple>
+                        <div class="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>点击或拖拽图片到此处上传</p>
+                            <span>支持 JPG、PNG 格式</span>
+                        </div>
+                    </div>
+                    <div class="image-preview" id="imagePreview">
+                        <p style='width:100%;text-align:center;color:#888;'>图片加载中...</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>插入图片到正文</label>
                     <input type="file" id="mdImageInput" accept="image/jpeg,image/png" style="display:none;">
-                    <button type="button" id="insertMdImageBtn">插入图片到正文</button>
+                    <button type="button" id="insertMdImageBtn" class="btn-secondary">
+                        <i class="fas fa-image"></i> 选择图片插入
+                    </button>
                 </div>
-                <label for="articleImage">图片（最多${IMAGE_CONFIG.article.maxCount}张）:</label>
-                <input type="file" id="articleImage" accept="image/jpeg,image/png" multiple>
-                <div class="image-preview" id="imagePreview">
-                    <p style='width:100%;text-align:center;color:#888;'>图片加载中...</p>
-                </div>
-                <div style="display:flex;gap:10px;margin-top:10px;">
-                    <button type="submit">保存更改</button>
-                    <button type="button" id="cancelEditButton">取消</button>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> 保存更改
+                    </button>
+                    <button type="button" id="cancelEditButton" class="btn-secondary">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="button" id="previewButton" class="btn-secondary">
+                        <i class="fas fa-eye"></i> 预览
+                    </button>
                 </div>
             </form>
         </div>
@@ -254,12 +311,17 @@ export function showEditForm(articleId) {
             return;
         }
         
+        // 解析标签
+        const tagsInput = $('#articleTags').value;
+        const tags = parseTagInput(tagsInput);
+        
         const updatedArticle = {
             ...article,
             title,
             category,
             content: text,
             images: finalImages,
+            tags,
             date: formatDate(new Date(), 'YYYY-MM-DD')
         };
         
@@ -276,6 +338,65 @@ export function showEditForm(articleId) {
             window.location.hash = `#article/${articleId}`;
         }
     };
+    
+    // 标签建议点击
+    document.querySelectorAll('.tag-suggestion').forEach(btn => {
+        btn.onclick = () => {
+            const tag = btn.dataset.tag;
+            const tagsInput = $('#articleTags');
+            const currentValue = tagsInput.value.trim();
+            
+            // 检查是否已存在
+            const existingTags = currentValue.split(/[,，]/).map(t => t.trim().toLowerCase());
+            if (existingTags.includes(tag.toLowerCase())) {
+                notify.info('标签已存在');
+                return;
+            }
+            
+            tagsInput.value = currentValue ? `${currentValue}, ${tag}` : tag;
+        };
+    });
+    
+    // 拖拽上传
+    const uploadArea = $('#imageUploadArea');
+    if (uploadArea) {
+        uploadArea.ondragover = (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        };
+        
+        uploadArea.ondragleave = () => {
+            uploadArea.classList.remove('dragover');
+        };
+        
+        uploadArea.ondrop = (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = Array.from(e.dataTransfer.files).filter(f => 
+                f.type === 'image/jpeg' || f.type === 'image/png'
+            );
+            
+            if (files.length > 0) {
+                // 模拟文件选择
+                const dataTransfer = new DataTransfer();
+                files.forEach(f => dataTransfer.items.add(f));
+                imageInput.files = dataTransfer.files;
+                imageInput.dispatchEvent(new Event('change'));
+            }
+        };
+    }
+    
+    // 预览按钮
+    const previewBtn = $('#previewButton');
+    if (previewBtn) {
+        previewBtn.onclick = () => {
+            const text = easyMDEInstance ? easyMDEInstance.value() : $('#articleContent').value;
+            if (easyMDEInstance) {
+                easyMDEInstance.togglePreview();
+            }
+        };
+    }
     
     initScrollAnimations();
 }

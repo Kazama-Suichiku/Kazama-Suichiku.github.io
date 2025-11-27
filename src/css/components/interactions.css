@@ -1,0 +1,235 @@
+/**
+ * 文章互动样式
+ * 点赞、收藏、分享
+ */
+
+.article-interactions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin: 1.5rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.interaction-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.stat-item i {
+    font-size: 0.85rem;
+}
+
+.interaction-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.interaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.interaction-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.interaction-btn.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.interaction-btn i {
+    font-size: 0.9rem;
+}
+
+/* 分享下拉菜单 */
+.share-dropdown {
+    position: relative;
+}
+
+.share-menu {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 8px;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 100;
+    min-width: 140px;
+}
+
+.share-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.share-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-align: left;
+}
+
+.share-option:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.share-option:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.share-option:hover {
+    background: rgba(var(--accent-rgb, 90, 125, 154), 0.1);
+}
+
+.share-option i {
+    width: 18px;
+    text-align: center;
+}
+
+.share-option .fa-weibo {
+    color: #e6162d;
+}
+
+.share-option .fa-twitter {
+    color: #1da1f2;
+}
+
+.share-option .fa-qrcode {
+    color: #07c160;
+}
+
+/* 二维码弹窗 */
+.qr-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+}
+
+.qr-modal-content {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.qr-modal-content h3 {
+    margin: 0 0 1rem;
+    color: var(--text-color);
+}
+
+.qr-modal-content img {
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.qr-modal-content p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.qr-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: var(--background-color);
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.qr-close:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* 深色模式 */
+:root.dark-mode .interaction-btn {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+:root.dark-mode .share-menu {
+    background: #2a2f3a;
+    border-color: #3a3f4b;
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+    .article-interactions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .interaction-stats {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .interaction-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .interaction-btn span {
+        display: none;
+    }
+    
+    .interaction-btn {
+        padding: 0.6rem;
+        border-radius: 50%;
+    }
+}
+

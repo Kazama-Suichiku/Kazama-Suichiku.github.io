@@ -1,0 +1,179 @@
+/**
+ * 标签系统样式
+ */
+
+/* 标签云 */
+.tag-cloud {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.tag-cloud-title {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.7rem;
+    background: rgba(var(--accent-rgb, 90, 125, 154), 0.08);
+    color: var(--text-muted);
+    border-radius: 15px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.tag-item:hover {
+    background: rgba(var(--accent-rgb, 90, 125, 154), 0.15);
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.tag-item.active {
+    background: var(--accent-color);
+    color: white;
+}
+
+.tag-item .tag-count {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+/* 标签大小级别 */
+.tag-item.size-1 { font-size: 0.75rem; }
+.tag-item.size-2 { font-size: 0.8rem; }
+.tag-item.size-3 { font-size: 0.85rem; }
+.tag-item.size-4 { font-size: 0.9rem; font-weight: 500; }
+.tag-item.size-5 { font-size: 0.95rem; font-weight: 600; }
+
+/* 文章标签 */
+.article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.article-tag {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    background: rgba(var(--accent-rgb, 90, 125, 154), 0.1);
+    color: var(--accent-color);
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.article-tag:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* 标签输入 */
+.tag-input-wrapper {
+    margin-bottom: 1rem;
+}
+
+.tag-input-wrapper label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.tag-input-wrapper input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+.tag-input-wrapper input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 90, 125, 154), 0.1);
+}
+
+.tag-suggestions {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.suggestion-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-right: 0.3rem;
+}
+
+.tag-suggestion {
+    padding: 0.2rem 0.5rem;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tag-suggestion:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* 当前筛选标签提示 */
+.active-tag-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(var(--accent-rgb, 90, 125, 154), 0.1);
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.active-tag-filter .tag-name {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.active-tag-filter .clear-filter {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.2rem;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.active-tag-filter .clear-filter:hover {
+    color: var(--accent-color);
+}
+

@@ -13,12 +13,42 @@ import notify from '../modules/notification.js';
 import { getArticles } from './home.js';
 import { getLimiter } from '../utils/rate-limiter.js';
 import { setButtonLoading } from '../modules/loading.js';
+import { createInteractionBar, bindInteractionEvents, incrementViewCount, getLikeCount, getViewCount } from '../modules/interactions.js';
+import { getAdjacentArticles, createArticleNav, createArticleMeta } from '../modules/article-nav.js';
+import { createArticleTags } from '../modules/tags.js';
 
 // 评论数据
 let comments = [];
 
 // 当前打开的回复表单
 let currentOpenReplyForm = null;
+
+/**
+ * 加载互动数据
+ * @param {Object} article - 文章对象
+ * @param {Object} stats - 统计对象
+ */
+async function loadInteractions(article, stats) {
+    const container = $('#interactionBar');
+    if (!container) return;
+    
+    try {
+        // 并行获取数据
+        const [views, likes] = await Promise.all([
+            incrementViewCount(article.id),
+            getLikeCount(article.id)
+        ]);
+        
+        stats.views = views;
+        stats.likes = likes;
+    } catch (e) {
+        console.error('加载统计数据失败:', e);
+    }
+    
+    // 渲染互动栏
+    container.innerHTML = createInteractionBar(article, stats);
+    bindInteractionEvents(container, article);
+}
 
 /**
  * 设置评论数据
@@ -291,16 +321,24 @@ export function showArticle(articleId) {
     }
     
     const content = $('#content');
-    if (!content) return;
+    if (!content) return null;
+    
+    // 获取上下篇文章
+    const { prev, next } = getAdjacentArticles(articles, articleId);
+    
+    // 获取统计数据
+    const stats = { views: 0, likes: 0 };
     
     const contentHtml = renderMarkdown(article.content || '');
+    const tagsHtml = createArticleTags(article.tags);
+    const metaHtml = createArticleMeta(article, { showReadingTime: true });
+    const navHtml = createArticleNav(prev, next);
     
     content.innerHTML = `
         <div class="article-page" data-article-id="${articleId}">
             <h1 class="animate-on-scroll">${escapeHtml(article.title || '无题')}</h1>
-            <p class="animate-on-scroll" style="animation-delay:0.1s;">
-                分类: ${escapeHtml(article.category || '未分类')} | 日期: ${article.date || '未知'}
-            </p>
+            ${metaHtml}
+            ${tagsHtml}
             ${(Array.isArray(article.images) && article.images.length > 0) ? `
                 <div class="gallery animate-on-scroll" style="animation-delay:0.2s;">
                     ${article.images.length > 1 ? '<button class="prev" title="上一张">◄</button>' : ''}
@@ -310,6 +348,11 @@ export function showArticle(articleId) {
                 </div>
             ` : ''}
             <div class="article-content animate-on-scroll" style="animation-delay:0.3s;">${contentHtml}</div>
+            
+            <div id="interactionBar"></div>
+            
+            ${navHtml}
+            
             <hr>
             <h2>评论区</h2>
             <div class="comments"><p style="text-align:center;color:#888;font-size:14px;">评论加载中...</p></div>
@@ -330,6 +373,9 @@ export function showArticle(articleId) {
             `}
         </div>
     `;
+    
+    // 异步加载统计数据和互动栏
+    loadInteractions(article, stats);
     
     // 增强 Markdown 内容
     const articleContent = content.querySelector('.article-content');
