@@ -147,19 +147,20 @@ function generateTOC(container) {
     const article = container.closest('.article-page');
     if (!article) return;
     
-    let toc = article.querySelector('.article-toc');
-    if (toc) return; // 已存在
+    // 移除旧目录
+    const oldToc = document.querySelector('.article-toc-fixed');
+    if (oldToc) oldToc.remove();
     
     const headings = container.querySelectorAll('h1,h2,h3');
     if (headings.length <= 1) return;
     
-    toc = document.createElement('nav');
-    toc.className = 'article-toc';
+    // 创建固定在右侧的目录
+    const toc = document.createElement('nav');
+    toc.className = 'article-toc-fixed';
     
-    let html = '<strong>📑 目录</strong><ul>';
+    let html = '<div class="toc-title">目录</div><ul>';
     headings.forEach((h, index) => {
-        // 生成唯一且稳定的 ID
-        const headingId = 'heading-' + index + '-' + h.textContent.replace(/\s+/g, '-').substring(0, 20);
+        const headingId = 'heading-' + index;
         h.id = headingId;
         const level = parseInt(h.tagName.substring(1), 10);
         html += `<li class="toc-level-${level}"><a href="javascript:void(0)" data-target="${headingId}">${h.textContent}</a></li>`;
@@ -168,7 +169,10 @@ function generateTOC(container) {
     
     toc.innerHTML = html;
     
-    // 绑定点击事件 - 平滑滚动到目标位置
+    // 添加到 body 而不是 article 内，确保固定定位正常
+    document.body.appendChild(toc);
+    
+    // 绑定点击事件
     toc.querySelectorAll('a[data-target]').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -178,7 +182,6 @@ function generateTOC(container) {
             const targetElement = document.getElementById(targetId);
             
             if (targetElement) {
-                // 计算滚动位置，考虑固定 header 的高度
                 const headerHeight = 80;
                 const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - headerHeight;
                 
@@ -187,34 +190,28 @@ function generateTOC(container) {
                     behavior: 'smooth'
                 });
                 
-                // 更新当前激活的目录项
                 toc.querySelectorAll('a').forEach(a => a.classList.remove('active'));
                 link.classList.add('active');
             }
         });
     });
     
-    // 滚动时高亮当前章节
+    // 滚动高亮
     setupTOCHighlight(toc, headings);
-    
-    article.insertBefore(toc, article.firstChild);
 }
 
 /**
  * 设置目录滚动高亮
- * @param {HTMLElement} toc - 目录元素
- * @param {NodeList} headings - 标题元素列表
  */
 function setupTOCHighlight(toc, headings) {
     let ticking = false;
     
     const updateHighlight = () => {
-        const headerHeight = 100;
         let currentHeading = null;
         
         headings.forEach(heading => {
             const rect = heading.getBoundingClientRect();
-            if (rect.top <= headerHeight + 50) {
+            if (rect.top <= 150) {
                 currentHeading = heading;
             }
         });
@@ -240,13 +237,21 @@ function setupTOCHighlight(toc, headings) {
         }
     });
     
-    // 初始高亮
     setTimeout(updateHighlight, 100);
+}
+
+/**
+ * 清除目录（页面切换时调用）
+ */
+export function clearTOC() {
+    const toc = document.querySelector('.article-toc-fixed');
+    if (toc) toc.remove();
 }
 
 export default {
     init: initMarkdown,
     render: renderMarkdown,
-    enhance: enhanceRenderedMarkdown
+    enhance: enhanceRenderedMarkdown,
+    clearTOC
 };
 

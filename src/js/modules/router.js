@@ -5,6 +5,7 @@
 
 import { $ } from '../utils/dom.js';
 import { disconnectScrollAnimations } from './scroll.js';
+import { clearTOC } from './markdown.js';
 
 // 路由处理函数映射
 const routes = {};
@@ -71,6 +72,9 @@ export function handleRoute() {
     
     // 断开滚动动画
     disconnectScrollAnimations();
+    
+    // 清除目录
+    clearTOC();
     
     // 显示加载状态
     content.innerHTML = '<p style="text-align:center; padding: 50px; color: #888;">加载中...</p>';
