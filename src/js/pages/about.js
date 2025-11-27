@@ -5,11 +5,13 @@
 import { $ } from '../utils/dom.js';
 import { PROFILE_CONFIG } from '../config.js';
 import { initScrollAnimations, disconnectScrollAnimations } from '../modules/scroll.js';
+import { renderSkills } from '../modules/skills.js';
+import { renderTimeline } from '../modules/timeline.js';
 
 /**
  * 显示关于页面
  */
-export function showAbout() {
+export async function showAbout() {
     disconnectScrollAnimations();
     
     const content = $('#content');
@@ -33,7 +35,25 @@ export function showAbout() {
             </p>
             <p>愿我们都能在学习的旅途中不断成长，享受创造的乐趣！</p>
         </div>
+        
+        <!-- 技能展示区 -->
+        <div id="skills-container" class="animate-on-scroll"></div>
+        
+        <!-- 时间线展示区 -->
+        <div id="timeline-container" class="animate-on-scroll"></div>
     `;
+    
+    // 渲染技能树
+    const skillsContainer = $('#skills-container');
+    if (skillsContainer) {
+        await renderSkills(skillsContainer);
+    }
+    
+    // 渲染时间线
+    const timelineContainer = $('#timeline-container');
+    if (timelineContainer) {
+        await renderTimeline(timelineContainer);
+    }
     
     initScrollAnimations();
 }

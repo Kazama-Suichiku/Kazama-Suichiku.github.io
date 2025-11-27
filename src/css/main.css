@@ -32,6 +32,11 @@
 @import './components/tags.css';
 @import './components/article-nav.css';
 @import './components/github-contrib.css';
+@import './components/effects.css';
+@import './components/reading-mode.css';
+@import './components/code-block.css';
+@import './components/skills.css';
+@import './components/timeline.css';
 
 /* ========== 页面样式 ========== */
 @import './pages/article.css';

@@ -1,0 +1,619 @@
+/**
+ * 技能树/技术栈样式
+ */
+
+/* ==================== 技能展示区 ==================== */
+
+.skills-section {
+    margin: var(--space-xl) 0;
+}
+
+.skills-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-l);
+}
+
+.skills-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+}
+
+.skills-header h2 i {
+    color: var(--color-accent-light);
+}
+
+body.dark-mode .skills-header h2 {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .skills-header h2 i {
+    color: var(--color-accent-dark);
+}
+
+.edit-skills-btn {
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.edit-skills-btn:hover {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+    color: white;
+}
+
+body.dark-mode .edit-skills-btn {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .edit-skills-btn:hover {
+    background: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+/* ==================== 技能网格 ==================== */
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-l);
+}
+
+.skill-category {
+    background: var(--color-surface-light);
+    border-radius: var(--radius-m);
+    padding: var(--space-l);
+    border: 1px solid var(--color-border-light);
+    transition: all 0.3s ease;
+}
+
+.skill-category:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+body.dark-mode .skill-category {
+    background: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .skill-category:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.skill-category h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    margin-bottom: var(--space-m);
+    color: var(--color-text-light);
+    padding-bottom: var(--space-s);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.skill-category h3 i {
+    color: var(--color-accent-light);
+    font-size: 1rem;
+}
+
+body.dark-mode .skill-category h3 {
+    color: var(--color-text-dark);
+    border-bottom-color: var(--color-border-dark);
+}
+
+body.dark-mode .skill-category h3 i {
+    color: var(--color-accent-dark);
+}
+
+/* ==================== 技能条 ==================== */
+
+.skill-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+.skill-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.skill-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.skill-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-light);
+}
+
+.skill-level {
+    font-size: 12px;
+    color: var(--color-text-muted-light);
+    font-weight: 600;
+}
+
+body.dark-mode .skill-name {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .skill-level {
+    color: var(--color-text-muted-dark);
+}
+
+.skill-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+body.dark-mode .skill-bar {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.skill-progress {
+    height: 100%;
+    width: 0;
+    background: var(--color, var(--color-accent-light));
+    border-radius: 4px;
+    transition: width 1s ease-out;
+}
+
+.skill-progress.animate {
+    width: var(--progress);
+}
+
+/* ==================== 编辑器模态框 ==================== */
+
+.skills-editor-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.skills-editor-content {
+    background: var(--color-bg-light);
+    border-radius: var(--radius-l);
+    width: 100%;
+    max-width: 700px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+body.dark-mode .skills-editor-content {
+    background: var(--color-bg-dark);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.skills-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-l);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+body.dark-mode .skills-editor-header {
+    border-bottom-color: var(--color-border-dark);
+}
+
+.skills-editor-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    color: var(--color-text-light);
+}
+
+.skills-editor-header h3 i {
+    color: var(--color-accent-light);
+}
+
+body.dark-mode .skills-editor-header h3 {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .skills-editor-header h3 i {
+    color: var(--color-accent-dark);
+}
+
+.close-editor-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-editor-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--color-text-light);
+}
+
+body.dark-mode .close-editor-btn {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .close-editor-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-dark);
+}
+
+/* ==================== 编辑器主体 ==================== */
+
+.skills-editor-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-tabs {
+    display: flex;
+    gap: 5px;
+    padding: var(--space-m) var(--space-l);
+    background: var(--color-surface-light);
+    border-bottom: 1px solid var(--color-border-light);
+    overflow-x: auto;
+    flex-shrink: 0;
+}
+
+body.dark-mode .editor-tabs {
+    background: var(--color-surface-dark);
+    border-bottom-color: var(--color-border-dark);
+}
+
+.editor-tab {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.editor-tab:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.editor-tab.active {
+    background: var(--color-accent-light);
+    color: white;
+}
+
+body.dark-mode .editor-tab {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .editor-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .editor-tab.active {
+    background: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+.add-category-tab {
+    padding: 8px 12px;
+}
+
+.editor-panels {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-l);
+}
+
+.editor-panel {
+    display: none;
+}
+
+.editor-panel.active {
+    display: block;
+}
+
+.category-settings {
+    display: flex;
+    gap: var(--space-m);
+    margin-bottom: var(--space-l);
+    flex-wrap: wrap;
+}
+
+.category-name-input {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+}
+
+body.dark-mode .category-name-input {
+    border-color: var(--color-border-dark);
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+}
+
+.category-icon-select {
+    padding: 10px 14px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+    cursor: pointer;
+}
+
+body.dark-mode .category-icon-select {
+    border-color: var(--color-border-dark);
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+}
+
+.delete-category-btn {
+    padding: 10px 14px;
+    border: 1px solid #e74c3c;
+    border-radius: 6px;
+    background: transparent;
+    color: #e74c3c;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-category-btn:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* ==================== 技能编辑项 ==================== */
+
+.skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+    margin-bottom: var(--space-m);
+}
+
+.skill-edit-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-s);
+    background: var(--color-surface-light);
+    border-radius: 6px;
+    border: 1px solid var(--color-border-light);
+}
+
+body.dark-mode .skill-edit-item {
+    background: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+}
+
+.skill-name-input {
+    flex: 1;
+    min-width: 100px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 4px;
+    font-size: 13px;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+}
+
+body.dark-mode .skill-name-input {
+    border-color: var(--color-border-dark);
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+}
+
+.skill-level-input {
+    width: 100px;
+    cursor: pointer;
+}
+
+.skill-level-display {
+    min-width: 40px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--color-text-muted-light);
+    font-weight: 600;
+}
+
+body.dark-mode .skill-level-display {
+    color: var(--color-text-muted-dark);
+}
+
+.skill-color-input {
+    width: 36px;
+    height: 36px;
+    padding: 2px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+}
+
+body.dark-mode .skill-color-input {
+    border-color: var(--color-border-dark);
+}
+
+.delete-skill-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #e74c3c;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-skill-btn:hover {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.add-skill-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border: 2px dashed var(--color-border-light);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.add-skill-btn:hover {
+    border-color: var(--color-accent-light);
+    color: var(--color-accent-light);
+}
+
+body.dark-mode .add-skill-btn {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .add-skill-btn:hover {
+    border-color: var(--color-accent-dark);
+    color: var(--color-accent-dark);
+}
+
+/* ==================== 编辑器底部 ==================== */
+
+.skills-editor-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-m);
+    padding: var(--space-l);
+    border-top: 1px solid var(--color-border-light);
+}
+
+body.dark-mode .skills-editor-footer {
+    border-top-color: var(--color-border-dark);
+}
+
+.skills-editor-footer .cancel-btn {
+    padding: 10px 20px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.skills-editor-footer .cancel-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .skills-editor-footer .cancel-btn {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .skills-editor-footer .cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.skills-editor-footer .save-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-accent-light);
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.skills-editor-footer .save-btn:hover {
+    background: #4a6d8a;
+}
+
+body.dark-mode .skills-editor-footer .save-btn {
+    background: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .skills-editor-footer .save-btn:hover {
+    background: #a2d1ee;
+}
+
+/* ==================== 响应式 ==================== */
+
+@media (max-width: 768px) {
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .skills-editor-content {
+        max-height: 90vh;
+    }
+    
+    .skill-edit-item {
+        flex-wrap: wrap;
+    }
+    
+    .skill-name-input {
+        width: 100%;
+    }
+    
+    .skill-level-input {
+        flex: 1;
+    }
+}
+

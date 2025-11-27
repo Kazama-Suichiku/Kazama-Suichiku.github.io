@@ -29,6 +29,9 @@ import { showArchive } from './pages/archive.js';
 
 // 新功能模块
 import { initGitHubContrib } from './modules/github-contrib.js';
+import { initAllEffects, init3DCards } from './modules/effects.js';
+import { initReadingMode, showReadingModeButton, hideReadingModeButton } from './modules/reading-mode.js';
+import { enhanceCodeBlocks } from './modules/code-block.js';
 
 /**
  * 初始化路由（带 SEO 更新）
@@ -40,30 +43,44 @@ function setupRoutes() {
     registerRoute('home', async () => {
         updateHomeSEO();
         toggleReadingProgress(false);
+        hideReadingModeButton();
         await showHome();
+        // 初始化 3D 卡片效果
+        setTimeout(() => init3DCards('.article-card'), 100);
     });
     
     registerRoute('article', async (id) => {
         toggleReadingProgress(true);
+        showReadingModeButton();
         const article = await showArticle(id);
         if (article) {
             updateArticleSEO(article);
         }
+        // 增强代码块
+        setTimeout(() => {
+            const articleContent = document.querySelector('.article-content');
+            if (articleContent) {
+                enhanceCodeBlocks(articleContent);
+            }
+        }, 100);
     });
     
     registerRoute('edit', async (id) => {
         toggleReadingProgress(false);
+        hideReadingModeButton();
         await showEditForm(id);
     });
     
-    registerRoute('about', () => {
+    registerRoute('about', async () => {
         updateAboutSEO();
         toggleReadingProgress(false);
-        showAbout();
+        hideReadingModeButton();
+        await showAbout();
     });
     
     registerRoute('archive', () => {
         toggleReadingProgress(false);
+        hideReadingModeButton();
         showArchive();
     });
 }
@@ -226,6 +243,12 @@ async function initialize() {
     
     // 初始化 GitHub 贡献图
     setTimeout(initGitHubContrib, 500);
+    
+    // 初始化视觉效果（打字机、鼠标光效、视差）
+    initAllEffects();
+    
+    // 初始化阅读模式
+    initReadingMode();
     
     // 设置路由
     setupRoutes();

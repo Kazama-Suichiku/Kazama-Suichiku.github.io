@@ -1,0 +1,658 @@
+/**
+ * 时间线样式
+ */
+
+/* ==================== 时间线区域 ==================== */
+
+.timeline-section {
+    margin: var(--space-xl) 0;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-l);
+}
+
+.timeline-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+}
+
+.timeline-header h2 i {
+    color: var(--color-accent-light);
+}
+
+body.dark-mode .timeline-header h2 {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .timeline-header h2 i {
+    color: var(--color-accent-dark);
+}
+
+.edit-timeline-btn {
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.edit-timeline-btn:hover {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+    color: white;
+}
+
+body.dark-mode .edit-timeline-btn {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .edit-timeline-btn:hover {
+    background: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+/* ==================== 时间线容器 ==================== */
+
+.timeline-container {
+    position: relative;
+    padding: var(--space-l) 0;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        var(--color-accent-light) 10%,
+        var(--color-accent-light) 90%,
+        transparent
+    );
+    transform: translateX(-50%);
+}
+
+body.dark-mode .timeline-line {
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        var(--color-accent-dark) 10%,
+        var(--color-accent-dark) 90%,
+        transparent
+    );
+}
+
+/* ==================== 时间线项目 ==================== */
+
+.timeline-item {
+    position: relative;
+    width: 50%;
+    padding: var(--space-m);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+    transition-delay: var(--delay, 0s);
+}
+
+.timeline-item.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.timeline-item.left {
+    padding-right: calc(var(--space-xl) + 20px);
+    text-align: right;
+}
+
+.timeline-item.right {
+    left: 50%;
+    padding-left: calc(var(--space-xl) + 20px);
+    text-align: left;
+}
+
+/* ==================== 时间线节点 ==================== */
+
+.timeline-dot {
+    position: absolute;
+    top: var(--space-m);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--dot-color, var(--color-accent-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.timeline-item.left .timeline-dot {
+    right: -20px;
+}
+
+.timeline-item.right .timeline-dot {
+    left: -20px;
+}
+
+/* ==================== 时间线内容 ==================== */
+
+.timeline-content {
+    background: var(--color-surface-light);
+    border-radius: var(--radius-m);
+    padding: var(--space-l);
+    border: 1px solid var(--color-border-light);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.timeline-content:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+body.dark-mode .timeline-content {
+    background: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .timeline-content:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 箭头 */
+.timeline-content::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+}
+
+.timeline-item.left .timeline-content::before {
+    right: -20px;
+    border-left-color: var(--color-surface-light);
+}
+
+.timeline-item.right .timeline-content::before {
+    left: -20px;
+    border-right-color: var(--color-surface-light);
+}
+
+body.dark-mode .timeline-item.left .timeline-content::before {
+    border-left-color: var(--color-surface-dark);
+}
+
+body.dark-mode .timeline-item.right .timeline-content::before {
+    border-right-color: var(--color-surface-dark);
+}
+
+.timeline-date {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-accent-light);
+    margin-bottom: var(--space-xs);
+}
+
+body.dark-mode .timeline-date {
+    color: var(--color-accent-dark);
+}
+
+.timeline-type {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--type-color, var(--color-accent-light));
+    color: white;
+    margin-left: var(--space-s);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timeline-title {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
+    margin: var(--space-s) 0;
+}
+
+body.dark-mode .timeline-title {
+    color: var(--color-text-dark);
+}
+
+.timeline-desc {
+    font-size: 14px;
+    color: var(--color-text-muted-light);
+    line-height: 1.6;
+    margin: 0;
+}
+
+body.dark-mode .timeline-desc {
+    color: var(--color-text-muted-dark);
+}
+
+/* ==================== 编辑器模态框 ==================== */
+
+.timeline-editor-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.timeline-editor-content {
+    background: var(--color-bg-light);
+    border-radius: var(--radius-l);
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+body.dark-mode .timeline-editor-content {
+    background: var(--color-bg-dark);
+}
+
+.timeline-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-l);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+body.dark-mode .timeline-editor-header {
+    border-bottom-color: var(--color-border-dark);
+}
+
+.timeline-editor-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    color: var(--color-text-light);
+}
+
+.timeline-editor-header h3 i {
+    color: var(--color-accent-light);
+}
+
+body.dark-mode .timeline-editor-header h3 {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .timeline-editor-header h3 i {
+    color: var(--color-accent-dark);
+}
+
+/* ==================== 编辑器主体 ==================== */
+
+.timeline-editor-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-l);
+}
+
+.timeline-events-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+    margin-bottom: var(--space-m);
+}
+
+.event-edit-item {
+    background: var(--color-surface-light);
+    border-radius: var(--radius-m);
+    border: 1px solid var(--color-border-light);
+    overflow: hidden;
+}
+
+body.dark-mode .event-edit-item {
+    background: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+}
+
+.event-edit-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+body.dark-mode .event-edit-header {
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom-color: var(--color-border-dark);
+}
+
+.event-drag-handle {
+    color: var(--color-text-muted-light);
+    cursor: grab;
+    padding: 5px;
+}
+
+body.dark-mode .event-drag-handle {
+    color: var(--color-text-muted-dark);
+}
+
+.event-date-input {
+    width: 80px;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 4px;
+    font-size: 13px;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+}
+
+body.dark-mode .event-date-input {
+    border-color: var(--color-border-dark);
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+}
+
+.event-type-select {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 4px;
+    font-size: 13px;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+    cursor: pointer;
+}
+
+body.dark-mode .event-type-select {
+    border-color: var(--color-border-dark);
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+}
+
+.delete-event-btn {
+    padding: 6px 10px;
+    border: none;
+    background: transparent;
+    color: #e74c3c;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-event-btn:hover {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.event-edit-body {
+    padding: var(--space-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.event-title-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+}
+
+body.dark-mode .event-title-input {
+    border-color: var(--color-border-dark);
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+}
+
+.event-desc-input {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+    resize: vertical;
+    font-family: inherit;
+}
+
+body.dark-mode .event-desc-input {
+    border-color: var(--color-border-dark);
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+}
+
+/* ==================== 图标选择器 ==================== */
+
+.event-icon-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    flex-wrap: wrap;
+}
+
+.event-icon-selector > span {
+    font-size: 13px;
+    color: var(--color-text-muted-light);
+}
+
+body.dark-mode .event-icon-selector > span {
+    color: var(--color-text-muted-dark);
+}
+
+.icon-options {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.icon-option {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-option:hover {
+    border-color: var(--color-accent-light);
+    color: var(--color-accent-light);
+}
+
+.icon-option.selected {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+    color: white;
+}
+
+body.dark-mode .icon-option {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .icon-option:hover {
+    border-color: var(--color-accent-dark);
+    color: var(--color-accent-dark);
+}
+
+body.dark-mode .icon-option.selected {
+    background: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+/* ==================== 添加事件按钮 ==================== */
+
+.add-event-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    border: 2px dashed var(--color-border-light);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.add-event-btn:hover {
+    border-color: var(--color-accent-light);
+    color: var(--color-accent-light);
+}
+
+body.dark-mode .add-event-btn {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .add-event-btn:hover {
+    border-color: var(--color-accent-dark);
+    color: var(--color-accent-dark);
+}
+
+/* ==================== 编辑器底部 ==================== */
+
+.timeline-editor-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-m);
+    padding: var(--space-l);
+    border-top: 1px solid var(--color-border-light);
+}
+
+body.dark-mode .timeline-editor-footer {
+    border-top-color: var(--color-border-dark);
+}
+
+.timeline-editor-footer .cancel-btn {
+    padding: 10px 20px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timeline-editor-footer .cancel-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .timeline-editor-footer .cancel-btn {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+.timeline-editor-footer .save-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-accent-light);
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.timeline-editor-footer .save-btn:hover {
+    background: #4a6d8a;
+}
+
+body.dark-mode .timeline-editor-footer .save-btn {
+    background: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+/* ==================== 响应式 ==================== */
+
+@media (max-width: 768px) {
+    .timeline-line {
+        left: 20px;
+    }
+    
+    .timeline-item {
+        width: 100%;
+        padding-left: 60px !important;
+        padding-right: var(--space-m) !important;
+        text-align: left !important;
+    }
+    
+    .timeline-item.left,
+    .timeline-item.right {
+        left: 0;
+    }
+    
+    .timeline-dot {
+        left: 0 !important;
+        right: auto !important;
+    }
+    
+    .timeline-content::before {
+        left: -20px !important;
+        right: auto !important;
+        border-left-color: transparent !important;
+        border-right-color: var(--color-surface-light) !important;
+    }
+    
+    body.dark-mode .timeline-content::before {
+        border-right-color: var(--color-surface-dark) !important;
+    }
+    
+    .event-edit-header {
+        flex-wrap: wrap;
+    }
+    
+    .event-date-input {
+        width: 100%;
+    }
+    
+    .event-type-select {
+        width: 100%;
+    }
+}
+
