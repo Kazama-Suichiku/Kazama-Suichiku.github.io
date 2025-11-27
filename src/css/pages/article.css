@@ -199,14 +199,20 @@
     margin-bottom: 8px;
 }
 
+nav.article-toc-fixed ul,
 .article-toc-fixed ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    flex-direction: unset !important;
 }
 
+nav.article-toc-fixed li,
 .article-toc-fixed li {
-    margin: 0;
+    margin: 0 !important;
+    display: block !important;
+    width: 100% !important;
 }
 
 .article-toc-fixed a {
