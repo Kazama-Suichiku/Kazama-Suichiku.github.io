@@ -358,10 +358,60 @@ body.dark-mode .event-edit-header {
     color: var(--color-text-muted-light);
     cursor: grab;
     padding: 5px;
+    transition: color 0.2s ease;
+}
+
+.event-drag-handle:hover {
+    color: var(--color-accent-light);
+}
+
+.event-drag-handle:active {
+    cursor: grabbing;
 }
 
 body.dark-mode .event-drag-handle {
     color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .event-drag-handle:hover {
+    color: var(--color-accent-dark);
+}
+
+/* 拖拽中的项目 */
+.event-edit-item.dragging {
+    opacity: 0.8;
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+    box-shadow: 0 8px 25px rgba(90, 125, 154, 0.3);
+    z-index: 100;
+}
+
+body.dark-mode .event-edit-item.dragging {
+    background: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+    box-shadow: 0 8px 25px rgba(146, 193, 222, 0.3);
+}
+
+.event-edit-item.dragging * {
+    color: white !important;
+}
+
+body.dark-mode .event-edit-item.dragging * {
+    color: var(--color-bg-dark) !important;
+}
+
+/* 拖拽占位符 */
+.drag-placeholder {
+    background: rgba(90, 125, 154, 0.1);
+    border: 2px dashed var(--color-accent-light);
+    border-radius: var(--radius-m);
+    margin-bottom: var(--space-m);
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .drag-placeholder {
+    background: rgba(146, 193, 222, 0.1);
+    border-color: var(--color-accent-dark);
 }
 
 .event-date-input {

@@ -240,6 +240,9 @@ function bindTimelineEditorEvents(modal, timeline) {
         if (e.target === modal) modal.remove();
     });
     
+    // 初始化拖拽排序
+    initDragSort(modal.querySelector('.timeline-events-list'));
+    
     // 图标选择
     modal.querySelectorAll('.icon-option').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -278,6 +281,9 @@ function bindTimelineEditorEvents(modal, timeline) {
         const newItem = document.createElement('div');
         newItem.innerHTML = createEventEditorItem(newEvent, newIndex);
         const itemElement = newItem.firstElementChild;
+        
+        // 绑定新元素的拖拽事件
+        bindDragEvents(itemElement, list);
         
         // 绑定新元素事件
         itemElement.querySelectorAll('.icon-option').forEach(btn => {
@@ -329,6 +335,125 @@ function bindTimelineEditorEvents(modal, timeline) {
             }
         }
     });
+}
+
+// ==================== 拖拽排序功能 ====================
+
+let draggedItem = null;
+let draggedItemIndex = -1;
+
+/**
+ * 初始化拖拽排序
+ * @param {HTMLElement} list - 列表容器
+ */
+function initDragSort(list) {
+    if (!list) return;
+    
+    const items = list.querySelectorAll('.event-edit-item');
+    items.forEach(item => bindDragEvents(item, list));
+}
+
+/**
+ * 为单个元素绑定拖拽事件
+ * @param {HTMLElement} item - 列表项
+ * @param {HTMLElement} list - 列表容器
+ */
+function bindDragEvents(item, list) {
+    const handle = item.querySelector('.event-drag-handle');
+    
+    // 鼠标按下开始拖拽
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        startDrag(item, list, e);
+    });
+    
+    // 触摸设备支持
+    handle.addEventListener('touchstart', (e) => {
+        startDrag(item, list, e.touches[0]);
+    }, { passive: true });
+}
+
+/**
+ * 开始拖拽
+ */
+function startDrag(item, list, e) {
+    draggedItem = item;
+    draggedItemIndex = Array.from(list.children).indexOf(item);
+    
+    // 添加拖拽样式
+    item.classList.add('dragging');
+    
+    // 记录初始位置
+    const rect = item.getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+    
+    // 创建占位符
+    const placeholder = document.createElement('div');
+    placeholder.className = 'drag-placeholder';
+    placeholder.style.height = `${rect.height}px`;
+    
+    // 移动处理
+    const onMove = (moveEvent) => {
+        const clientY = moveEvent.clientY || (moveEvent.touches && moveEvent.touches[0].clientY);
+        if (!clientY) return;
+        
+        // 找到目标位置
+        const items = Array.from(list.querySelectorAll('.event-edit-item:not(.dragging)'));
+        let targetIndex = items.length;
+        
+        for (let i = 0; i < items.length; i++) {
+            const itemRect = items[i].getBoundingClientRect();
+            const itemMiddle = itemRect.top + itemRect.height / 2;
+            
+            if (clientY < itemMiddle) {
+                targetIndex = i;
+                break;
+            }
+        }
+        
+        // 移除旧占位符
+        const oldPlaceholder = list.querySelector('.drag-placeholder');
+        if (oldPlaceholder) oldPlaceholder.remove();
+        
+        // 插入新占位符
+        if (targetIndex < items.length) {
+            list.insertBefore(placeholder, items[targetIndex]);
+        } else {
+            // 插入到最后（在添加按钮之前）
+            const addBtn = list.parentElement.querySelector('.add-event-btn');
+            if (addBtn) {
+                list.appendChild(placeholder);
+            } else {
+                list.appendChild(placeholder);
+            }
+        }
+    };
+    
+    // 结束拖拽
+    const onEnd = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+        
+        // 移除拖拽样式
+        item.classList.remove('dragging');
+        
+        // 将拖拽项插入到占位符位置
+        const placeholder = list.querySelector('.drag-placeholder');
+        if (placeholder) {
+            list.insertBefore(item, placeholder);
+            placeholder.remove();
+        }
+        
+        draggedItem = null;
+        draggedItemIndex = -1;
+    };
+    
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchmove', onMove, { passive: true });
+    document.addEventListener('touchend', onEnd);
 }
 
 export default {
