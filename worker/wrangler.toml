@@ -1,0 +1,7 @@
+name = "firebase-proxy"
+main = "src/index.js"
+compatibility_date = "2025-11-27"
+
+[vars]
+FIREBASE_DATABASE_URL = "https://my-blog-fa883-default-rtdb.asia-southeast1.firebasedatabase.app"
+

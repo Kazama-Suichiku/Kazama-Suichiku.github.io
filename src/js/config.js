@@ -15,6 +15,13 @@ export const FIREBASE_CONFIG = {
     measurementId: "G-TZ7XSZTECY"
 };
 
+// Cloudflare Worker 代理配置（用于国内访问）
+export const PROXY_CONFIG = {
+    enabled: true,  // 是否启用代理
+    url: 'https://crimson-frost-e2bf.fengzhongcuizhu.workers.dev',
+    timeout: 5000   // 检测超时时间（毫秒）
+};
+
 // 管理员配置
 export const ADMIN_CONFIG = {
     email: '3196968430@qq.com',

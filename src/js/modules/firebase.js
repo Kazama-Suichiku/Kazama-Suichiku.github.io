@@ -1,10 +1,12 @@
 /**
  * Firebase 模块
  * 处理 Firebase 认证和数据库操作
+ * 支持直连和代理两种模式
  */
 
 import { FIREBASE_CONFIG, ADMIN_CONFIG, COMMENT_CONFIG } from '../config.js';
 import notify from './notification.js';
+import { checkProxyNeeded, isUsingProxy, proxyGet, proxySet, proxyPush, proxyDelete } from '../utils/proxy-db.js';
 
 // Firebase 实例引用
 let auth = null;
@@ -19,7 +21,7 @@ const authCallbacks = [];
 /**
  * 初始化 Firebase
  */
-export function initFirebase() {
+export async function initFirebase() {
     if (typeof firebase === 'undefined') {
         console.error('Firebase SDK 未加载');
         return;
@@ -32,6 +34,13 @@ export function initFirebase() {
     
     auth = firebase.auth();
     db = firebase.database();
+    
+    // 检测是否需要使用代理
+    await checkProxyNeeded();
+    
+    if (isUsingProxy()) {
+        console.log('🔄 已启用 Cloudflare Worker 代理模式');
+    }
     
     // 监听认证状态
     auth.onAuthStateChanged(user => {
@@ -168,53 +177,100 @@ export function getRef(path) {
 }
 
 /**
- * 读取数据
+ * 读取数据（支持代理模式）
  * @param {string} path - 路径
  * @returns {Promise<any>}
  */
 export async function getData(path) {
+    // 如果使用代理模式，通过 Worker 获取数据
+    if (isUsingProxy()) {
+        return proxyGet(path);
+    }
+    
     const snapshot = await getRef(path).once('value');
     return snapshot.val();
 }
 
 /**
- * 设置数据
+ * 设置数据（支持代理模式）
  * @param {string} path - 路径
  * @param {any} data - 数据
  * @returns {Promise}
  */
 export async function setData(path, data) {
+    // 如果使用代理模式，通过 Worker 写入数据
+    if (isUsingProxy()) {
+        return proxySet(path, data);
+    }
+    
     return getRef(path).set(data);
 }
 
 /**
- * 推送数据（自动生成 key）
+ * 推送数据（自动生成 key，支持代理模式）
  * @param {string} path - 路径
  * @param {any} data - 数据
  * @returns {Promise<string>} - 返回生成的 key
  */
 export async function pushData(path, data) {
+    // 如果使用代理模式，通过 Worker 推送数据
+    if (isUsingProxy()) {
+        const result = await proxyPush(path, data);
+        return result.name; // Firebase REST API 返回 { name: "生成的key" }
+    }
+    
     const ref = getRef(path).push();
     await ref.set(data);
     return ref.key;
 }
 
 /**
- * 删除数据
+ * 删除数据（支持代理模式）
  * @param {string} path - 路径
  * @returns {Promise}
  */
 export async function removeData(path) {
+    // 如果使用代理模式，通过 Worker 删除数据
+    if (isUsingProxy()) {
+        return proxyDelete(path);
+    }
+    
     return getRef(path).remove();
 }
 
 /**
  * 监听数据变化
+ * 注意：代理模式不支持实时监听，会改为轮询
  * @param {string} path - 路径
  * @param {Function} callback - 回调函数
  * @returns {Function} - 取消监听函数
  */
 export function onDataChange(path, callback) {
+    // 如果使用代理模式，改为轮询
+    if (isUsingProxy()) {
+        let active = true;
+        const poll = async () => {
+            if (!active) return;
+            try {
+                const data = await proxyGet(path);
+                callback(data);
+            } catch (error) {
+                console.error('轮询数据失败:', error);
+            }
+        };
+        
+        // 立即执行一次
+        poll();
+        
+        // 每30秒轮询一次
+        const intervalId = setInterval(poll, 30000);
+        
+        return () => {
+            active = false;
+            clearInterval(intervalId);
+        };
+    }
+    
     const ref = getRef(path);
     ref.on('value', snapshot => {
         callback(snapshot.val());
@@ -353,6 +409,7 @@ export default {
     deleteComment,
     onCommentsChange,
     getAvatar,
-    saveAvatar
+    saveAvatar,
+    isUsingProxy
 };
 

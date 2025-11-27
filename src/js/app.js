@@ -185,7 +185,7 @@ function setupAuthListener() {
 /**
  * 初始化应用
  */
-function initialize() {
+async function initialize() {
     // 设置全局错误处理
     setupGlobalErrorHandler();
     
@@ -193,8 +193,8 @@ function initialize() {
     const yearSpan = $('#currentYear');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
     
-    // 初始化 Firebase
-    initFirebase();
+    // 初始化 Firebase（异步，会检测是否需要代理）
+    await initFirebase();
     
     // 初始化 Firebase Storage
     initStorage();
