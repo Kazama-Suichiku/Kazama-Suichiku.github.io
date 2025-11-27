@@ -11,23 +11,45 @@ let proxyChecked = false;
 
 /**
  * 检测是否需要使用代理
+ * 支持强制代理模式和自动检测模式
  * @returns {Promise<boolean>}
  */
 export async function checkProxyNeeded() {
     if (proxyChecked) return useProxy;
     
+    // 代理功能未启用
     if (!PROXY_CONFIG.enabled) {
         proxyChecked = true;
         useProxy = false;
+        console.log('ℹ️ 代理功能未启用，使用直连模式');
         return false;
     }
     
+    // 强制使用代理模式（推荐国内用户使用）
+    if (PROXY_CONFIG.forceProxy) {
+        proxyChecked = true;
+        useProxy = true;
+        console.log('🔄 已启用强制代理模式');
+        
+        // 验证代理服务是否可用
+        try {
+            const proxyResponse = await fetch(`${PROXY_CONFIG.url}/health`);
+            if (proxyResponse.ok) {
+                console.log('✅ 代理服务正常');
+            }
+        } catch (e) {
+            console.warn('⚠️ 代理服务检测失败，但仍尝试使用:', e.message);
+        }
+        
+        return true;
+    }
+    
+    // 自动检测模式：尝试直连 Firebase
     try {
-        // 尝试直连 Firebase
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), PROXY_CONFIG.timeout);
         
-        const response = await fetch(`${FIREBASE_CONFIG.databaseURL}/.json?shallow=true`, {
+        const response = await fetch(`${FIREBASE_CONFIG.databaseURL}/articles.json?shallow=true&limitToFirst=1`, {
             method: 'GET',
             signal: controller.signal
         });
@@ -35,18 +57,32 @@ export async function checkProxyNeeded() {
         clearTimeout(timeoutId);
         
         if (response.ok) {
+            await response.json(); // 确保能解析响应
             console.log('✅ Firebase 直连成功，无需代理');
             useProxy = false;
         } else {
-            console.log('⚠️ Firebase 直连失败，切换到代理模式');
+            console.log('⚠️ Firebase 直连响应异常，切换到代理模式');
             useProxy = true;
         }
     } catch (error) {
-        console.log('⚠️ Firebase 直连超时或失败，切换到代理模式:', error.message);
+        console.log('⚠️ Firebase 直连失败，切换到代理模式:', error.message);
         useProxy = true;
     }
     
     proxyChecked = true;
+    
+    // 如果需要代理，验证代理服务
+    if (useProxy) {
+        try {
+            const proxyResponse = await fetch(`${PROXY_CONFIG.url}/health`);
+            if (proxyResponse.ok) {
+                console.log('✅ 代理服务正常，已启用代理模式');
+            }
+        } catch (e) {
+            console.warn('⚠️ 代理服务检测失败:', e.message);
+        }
+    }
+    
     return useProxy;
 }
 

@@ -17,9 +17,10 @@ export const FIREBASE_CONFIG = {
 
 // Cloudflare Worker 代理配置（用于国内访问）
 export const PROXY_CONFIG = {
-    enabled: true,  // 是否启用代理
+    enabled: true,       // 是否启用代理功能
+    forceProxy: true,    // 强制使用代理（跳过检测，国内用户建议开启）
     url: 'https://crimson-frost-e2bf.fengzhongcuizhu.workers.dev',
-    timeout: 5000   // 检测超时时间（毫秒）
+    timeout: 3000        // 检测超时时间（毫秒）
 };
 
 // 管理员配置
