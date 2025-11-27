@@ -1,0 +1,86 @@
+/**
+ * 关于页面样式
+ */
+
+.about-page {
+    padding: var(--space-xl) var(--space-l);
+    background-color: var(--color-surface-light);
+    border-radius: var(--radius-m);
+    box-shadow: 0 4px 12px var(--color-shadow-light);
+    margin: var(--space-xl) auto;
+    border: 1px solid var(--color-border-light);
+    transition: background-color var(--transition-normal), border-color var(--transition-normal);
+    max-width: 800px;
+}
+
+.about-page h1 {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.about-page p,
+.about-page ul {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--color-text-light);
+    max-width: 65ch;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.about-page ul {
+    list-style: circle;
+    margin-left: calc(auto + var(--space-l));
+    padding-left: var(--space-m);
+}
+
+.about-page li {
+    margin-bottom: var(--space-m);
+}
+
+.about-page strong {
+    color: var(--color-accent-light);
+    font-weight: 700;
+}
+
+.about-page p:last-of-type {
+    margin-top: var(--space-xl);
+    text-align: center;
+    font-style: italic;
+    color: var(--color-text-muted-light);
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode .about-page {
+    background-color: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: none;
+}
+
+body.dark-mode .about-page p,
+body.dark-mode .about-page ul {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .about-page strong {
+    color: var(--color-accent-dark);
+}
+
+body.dark-mode .about-page p:last-of-type {
+    color: var(--color-text-muted-dark);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 700px) {
+    .about-page {
+        box-shadow: none;
+    }
+}
+
+@media (max-width: 500px) {
+    .about-page {
+        padding: var(--space-s) var(--space-xs);
+        border-radius: var(--radius-s);
+    }
+}
+

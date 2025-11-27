@@ -1,0 +1,94 @@
+/**
+ * 主容器布局样式
+ */
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: var(--space-xl) auto;
+    padding: 0 var(--space-m);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* 主内容区 */
+main {
+    flex: 1;
+    max-width: var(--content-width);
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+/* ========== 响应式布局 ========== */
+@media (max-width: 1300px) {
+    .container {
+        max-width: 100vw;
+        padding: 0 var(--space-m);
+    }
+    
+    nav {
+        width: 100%;
+        max-width: 100vw;
+        padding: 0 var(--space-m);
+    }
+}
+
+@media (max-width: 1000px) {
+    .container {
+        flex-direction: column;
+        gap: 0;
+        padding: 0 4vw;
+        align-items: center;
+    }
+    
+    .sidebar {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: var(--space-l);
+        align-self: stretch;
+    }
+    
+    main {
+        width: 100%;
+        max-width: 100vw;
+        padding: 0;
+    }
+}
+
+@media (max-width: 700px) {
+    html, body {
+        min-width: 0;
+        font-size: 15px;
+    }
+    
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 4vw;
+    }
+    
+    .logo-link {
+        font-size: var(--font-size-l);
+    }
+    
+    .container {
+        padding: 0 2vw;
+    }
+}
+
+@media (max-width: 500px) {
+    html, body {
+        font-size: 13px;
+    }
+    
+    .container {
+        padding: 0 1vw;
+    }
+}
+

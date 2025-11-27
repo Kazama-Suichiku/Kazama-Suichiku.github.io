@@ -1,0 +1,225 @@
+/**
+ * 按钮组件样式
+ */
+
+/* 基础按钮 */
+.btn {
+    padding: var(--space-s) var(--space-l);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* 主要按钮 */
+.btn-primary {
+    background-color: var(--color-primary-light);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark-light);
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* 编辑按钮 */
+.edit-button {
+    padding: var(--space-xs) var(--space-m);
+    border: 1px solid var(--color-primary-light);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: transparent;
+    color: var(--color-primary-light);
+}
+
+.edit-button:hover {
+    background-color: var(--color-primary-light);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* 删除按钮 */
+.delete-button {
+    padding: var(--space-xs) var(--space-m);
+    border: 1px solid var(--color-accent-light);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: transparent;
+    color: var(--color-accent-light);
+}
+
+.delete-button:hover {
+    background-color: var(--color-accent-light);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* 回复按钮 */
+.reply-button {
+    background-color: transparent;
+    color: var(--color-primary-light);
+    border: 1px solid transparent;
+    padding: var(--space-xs) var(--space-s);
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: var(--space-s);
+    font-size: 13px;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    float: right;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.reply-button:hover {
+    background-color: var(--color-highlight-light);
+    color: var(--color-primary-dark-light);
+    border-color: var(--color-highlight-light);
+}
+
+/* 删除评论按钮 */
+.delete-comment-button {
+    background-color: transparent;
+    color: var(--color-accent-light);
+    border: 1px solid transparent;
+    padding: var(--space-xs) var(--space-s);
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: var(--space-s);
+    margin-left: var(--space-s);
+    font-size: 13px;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    float: right;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.delete-comment-button:hover {
+    background-color: var(--color-accent-light);
+    color: white;
+    border-color: transparent;
+}
+
+/* 返回顶部按钮 */
+.back-to-top {
+    position: fixed;
+    bottom: var(--space-l);
+    right: var(--space-l);
+    background-color: var(--color-primary-light);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-normal), background-color var(--transition-fast), transform var(--transition-fast), visibility var(--transition-normal);
+    font-size: var(--font-size-xl);
+    line-height: 48px;
+    text-align: center;
+    z-index: 50;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.back-to-top:hover {
+    background-color: var(--color-primary-dark-light);
+    transform: scale(1.1) translateY(-3px);
+}
+
+.back-to-top.visible {
+    opacity: 0.8;
+    visibility: visible;
+}
+
+.back-to-top.visible:hover {
+    opacity: 1;
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode .edit-button {
+    background-color: transparent;
+    color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+body.dark-mode .edit-button:hover {
+    background-color: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .delete-button {
+    background-color: transparent;
+    color: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+}
+
+body.dark-mode .delete-button:hover {
+    background-color: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .reply-button {
+    color: var(--color-primary-dark);
+}
+
+body.dark-mode .reply-button:hover {
+    background-color: var(--color-highlight-dark);
+    color: #a6d8e8;
+    border-color: transparent;
+}
+
+body.dark-mode .delete-comment-button {
+    color: var(--color-accent-dark);
+}
+
+body.dark-mode .delete-comment-button:hover {
+    background-color: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .back-to-top {
+    background-color: var(--color-surface-dark);
+    color: var(--color-text-muted-dark);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .back-to-top:hover {
+    background-color: var(--color-border-dark);
+    color: var(--color-text-dark);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 700px) {
+    .back-to-top {
+        width: 38px;
+        height: 38px;
+        font-size: var(--font-size-l);
+        right: 10px;
+        bottom: 10px;
+    }
+}
+
+@media (max-width: 500px) {
+    .back-to-top {
+        width: 28px;
+        height: 28px;
+        font-size: var(--font-size-xs);
+    }
+}
+

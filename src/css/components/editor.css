@@ -1,0 +1,120 @@
+/**
+ * Markdown 编辑器样式
+ */
+
+/* Paper-like Editor Background */
+.EasyMDEContainer,
+.CodeMirror,
+#articleContent,
+.editor-paper-bg {
+    background: #f8f5e6 !important;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(180, 160, 120, 0.08);
+    border: 1px solid #e5e0d8;
+    font-family: var(--font-heading), var(--font-body), serif, sans-serif;
+    color: #3a2c1a;
+}
+
+body.dark-mode .EasyMDEContainer,
+body.dark-mode .CodeMirror,
+body.dark-mode #articleContent,
+body.dark-mode .editor-paper-bg {
+    background: #2d2a26 !important;
+    color: #e5e0d8;
+    border: 1px solid #3a3328;
+}
+
+/* 美化 EasyMDE 工具栏 */
+.EasyMDEContainer .editor-toolbar {
+    background: #f3ede0;
+    border-radius: 10px 10px 0 0;
+    border: 1px solid #e5e0d8;
+    border-bottom: none;
+    box-shadow: 0 2px 8px rgba(180, 160, 120, 0.06);
+}
+
+body.dark-mode .EasyMDEContainer .editor-toolbar {
+    background: #23201c;
+    border-color: #3a3328;
+}
+
+.EasyMDEContainer .editor-toolbar button {
+    border-radius: 6px;
+    margin: 0 2px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.EasyMDEContainer .editor-toolbar button:hover {
+    background: #e5e0d8;
+    color: #b08c6a;
+}
+
+body.dark-mode .EasyMDEContainer .editor-toolbar button:hover {
+    background: #3a3328;
+    color: #ffe6b3;
+}
+
+/* 编辑区排版优化 */
+.CodeMirror-lines {
+    font-size: 17px;
+    line-height: 1.85;
+    letter-spacing: 0.01em;
+    padding: 18px 0;
+}
+
+/* Markdown 预览区优化 */
+.editor-preview,
+.editor-preview-active {
+    background: #f8f5e6 !important;
+    color: #3a2c1a;
+    font-size: 17px;
+    line-height: 1.85;
+    padding: 24px 32px;
+    border-radius: 0 0 10px 10px;
+}
+
+body.dark-mode .editor-preview,
+body.dark-mode .editor-preview-active {
+    background: #2d2a26 !important;
+    color: #e5e0d8;
+}
+
+/* 让预览区图片更美观 */
+.editor-preview img,
+.editor-preview-active img {
+    max-width: 90%;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(80, 60, 30, 0.08);
+    margin: 18px auto;
+    display: block;
+}
+
+/* Markdown 说明样式 */
+.markdown-hint {
+    background: #f8f5e6;
+    color: #8a7b5a;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #e5e0d8;
+}
+
+body.dark-mode .markdown-hint {
+    background: #2d2a26;
+    color: #e5e0d8;
+    border-color: #3a3328;
+}
+
+/* 保证图片不溢出容器 */
+.article-content img,
+.editor-preview img,
+.editor-preview-active img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 18px auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(80, 60, 30, 0.08);
+}
+

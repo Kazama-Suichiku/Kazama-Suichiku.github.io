@@ -1,0 +1,70 @@
+/**
+ * CSS 变量定义
+ * 包含所有主题颜色、字体、间距等变量
+ */
+
+:root {
+    /* ========== 字体 ========== */
+    --font-heading: 'Merriweather', serif;
+    --font-body: 'Lato', sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+    
+    /* ========== 浅色主题颜色 ========== */
+    --color-primary-light: #5a7d9a;
+    --color-primary-dark-light: #48647c;
+    --color-accent-light: #c89b70;
+    --color-text-light: #2f2f2f;
+    --color-text-muted-light: #6c757d;
+    --color-bg-light: #f7f5f2;
+    --color-surface-light: #ffffff;
+    --color-border-light: #e8e5e0;
+    --color-shadow-light: rgba(80, 80, 90, 0.08);
+    --color-highlight-light: rgba(90, 125, 154, 0.08);
+    
+    /* ========== 深色主题颜色 ========== */
+    --color-primary-dark: #92c1de;
+    --color-primary-dark-dark: #7aabbf;
+    --color-accent-dark: #d8b593;
+    --color-text-dark: #e1e8f0;
+    --color-text-muted-dark: #a0a8b7;
+    --color-bg-dark: #282c34;
+    --color-surface-dark: #333842;
+    --color-border-dark: #4a505a;
+    --color-shadow-dark: rgba(0, 0, 0, 0.3);
+    --color-highlight-dark: rgba(146, 193, 222, 0.1);
+    
+    /* ========== 过渡动画 ========== */
+    --transition-fast: 0.2s ease-out;
+    --transition-normal: 0.3s ease-out;
+    --transition-slow: 0.5s ease-out;
+    
+    /* ========== 间距 ========== */
+    --space-xs: 4px;
+    --space-s: 8px;
+    --space-m: 16px;
+    --space-l: 24px;
+    --space-xl: 32px;
+    --space-xxl: 48px;
+    
+    /* ========== 圆角 ========== */
+    --radius-s: 4px;
+    --radius-m: 8px;
+    --radius-l: 12px;
+    --radius-full: 50%;
+    
+    /* ========== 字号 ========== */
+    --font-size-xs: 12px;
+    --font-size-s: 14px;
+    --font-size-m: 16px;
+    --font-size-l: 18px;
+    --font-size-xl: 24px;
+    --font-size-xxl: 32px;
+    --font-size-xxxl: 48px;
+    
+    /* ========== 布局 ========== */
+    --container-width: 1200px;
+    --sidebar-width: 300px;
+    --content-width: 880px;
+    --header-height: 60px;
+}
+

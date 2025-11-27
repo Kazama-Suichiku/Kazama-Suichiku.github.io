@@ -1,0 +1,61 @@
+/**
+ * 通知组件样式
+ */
+
+.notification {
+    position: fixed;
+    top: var(--space-l);
+    right: var(--space-l);
+    padding: var(--space-m) var(--space-l);
+    border-radius: 6px;
+    z-index: 1100;
+    font-size: var(--font-size-m);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 220px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: slideInNotification 0.4s 0.1s ease-out forwards;
+}
+
+@keyframes slideInNotification {
+    to {
+        opacity: 0.95;
+        transform: translateY(0);
+    }
+}
+
+.notification:hover {
+    opacity: 1;
+}
+
+.notification.error {
+    background-color: #d16060;
+}
+
+.notification.success {
+    background-color: #6aae6a;
+}
+
+.notification.info {
+    background-color: var(--color-primary-light);
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode .notification.error {
+    background-color: #d06767;
+    color: white;
+}
+
+body.dark-mode .notification.success {
+    background-color: #78b878;
+    color: white;
+}
+
+body.dark-mode .notification.info {
+    background-color: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+

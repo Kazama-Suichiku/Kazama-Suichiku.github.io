@@ -1,0 +1,39 @@
+/**
+ * 页脚样式
+ */
+
+footer {
+    text-align: center;
+    padding: var(--space-xl);
+    background-color: var(--color-bg-light);
+    color: var(--color-text-muted-light);
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: var(--font-size-s);
+    border-top: 1px solid var(--color-border-light);
+    transition: background-color var(--transition-normal), color var(--transition-normal), border-color var(--transition-normal);
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode footer {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-muted-dark);
+    border-color: var(--color-border-dark);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 700px) {
+    footer {
+        padding: var(--space-l);
+        font-size: var(--font-size-xs);
+    }
+}
+
+@media (max-width: 500px) {
+    footer {
+        padding: var(--space-s);
+        font-size: 10px;
+    }
+}
+

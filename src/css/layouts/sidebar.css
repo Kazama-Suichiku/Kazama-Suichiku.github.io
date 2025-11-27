@@ -1,0 +1,268 @@
+/**
+ * 侧边栏样式
+ */
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background-color: var(--color-surface-light);
+    padding: var(--space-l);
+    border-radius: var(--radius-l);
+    box-shadow: 0 5px 15px var(--color-shadow-light);
+    border: 1px solid var(--color-border-light);
+    align-self: flex-start;
+    transition: background-color var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+/* 个人资料 */
+.profile .avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: var(--radius-full);
+    margin: 0 auto var(--space-l);
+    display: block;
+    object-fit: cover;
+    border: 4px solid var(--color-surface-light);
+    box-shadow: 0 4px 12px var(--color-shadow-light);
+    background-color: var(--color-border-light);
+}
+
+.profile-name {
+    font-size: 27px;
+    margin-bottom: var(--space-s);
+    color: var(--color-text-light);
+    text-align: center;
+}
+
+.profile-bio {
+    font-size: 15px;
+    color: var(--color-text-muted-light);
+    line-height: 1.6;
+    margin-bottom: var(--space-xl);
+    text-align: center;
+}
+
+/* 头像上传 */
+#avatarUploadSection {
+    text-align: center;
+    margin-top: var(--space-l);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.avatar-upload-label {
+    display: inline-block;
+    padding: var(--space-s) var(--space-l);
+    background-color: transparent;
+    color: var(--color-primary-light);
+    border: 1px solid var(--color-primary-light);
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    margin-bottom: var(--space-m);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.avatar-upload-label:hover {
+    background-color: var(--color-primary-light);
+    color: white;
+}
+
+.avatar-preview {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-m);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-border-light);
+    display: none;
+    object-fit: cover;
+}
+
+#uploadAvatarButton {
+    padding: var(--space-s) var(--space-l);
+    background-color: var(--color-primary-light);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    display: block;
+    width: 100%;
+    margin-top: var(--space-s);
+    box-sizing: border-box;
+    transition: background-color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+#uploadAvatarButton:hover {
+    background-color: var(--color-primary-dark-light);
+    transform: scale(1.02);
+}
+
+#uploadAvatarButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+}
+
+/* 联系方式 */
+.contact {
+    margin-top: var(--space-l);
+}
+
+.contact h3 {
+    font-size: var(--font-size-s);
+    color: var(--color-text-muted-light);
+    margin-bottom: var(--space-m);
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: var(--space-s);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.contact p {
+    margin-bottom: var(--space-s);
+    font-size: var(--font-size-s);
+}
+
+.contact a {
+    color: var(--color-text-muted-light);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-s);
+}
+
+.contact a:hover {
+    color: var(--color-primary-light);
+    text-decoration: none;
+}
+
+.contact .icon::before {
+    content: '•';
+    font-size: var(--font-size-m);
+    color: var(--color-primary-light);
+    opacity: 0.6;
+    margin-right: 4px;
+    display: inline-block;
+    transition: transform var(--transition-fast);
+}
+
+.contact .github {
+    font-size: var(--font-size-m);
+}
+
+.contact a:hover .icon::before {
+    transform: translateX(3px);
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode .sidebar {
+    background-color: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: 0 5px 15px var(--color-shadow-dark);
+}
+
+body.dark-mode .profile .avatar {
+    border-color: var(--color-surface-dark);
+    background-color: var(--color-border-dark);
+    box-shadow: 0 4px 12px var(--color-shadow-dark);
+}
+
+body.dark-mode .profile-name {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .profile-bio {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode #avatarUploadSection {
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .avatar-upload-label {
+    color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+body.dark-mode .avatar-upload-label:hover {
+    background-color: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .avatar-preview {
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode #uploadAvatarButton {
+    background-color: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode #uploadAvatarButton:hover {
+    background-color: var(--color-primary-dark-dark);
+}
+
+body.dark-mode #uploadAvatarButton:disabled {
+    background-color: #555;
+    opacity: 0.6;
+}
+
+body.dark-mode .contact h3 {
+    color: var(--color-text-muted-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .contact a {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .contact a:hover {
+    color: var(--color-primary-dark);
+}
+
+body.dark-mode .contact .icon::before {
+    color: var(--color-primary-dark);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 700px) {
+    .sidebar {
+        padding: var(--space-m);
+        border-radius: var(--radius-m);
+    }
+    
+    .profile .avatar {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .profile-name {
+        font-size: 20px;
+    }
+    
+    .profile-bio {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 500px) {
+    .sidebar {
+        padding: var(--space-s);
+        border-radius: 6px;
+    }
+    
+    .profile .avatar {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .profile-name {
+        font-size: 15px;
+    }
+}
+

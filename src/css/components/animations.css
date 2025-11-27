@@ -1,0 +1,36 @@
+/**
+ * 动画样式
+ */
+
+/* 滚动动画 */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    will-change: opacity, transform;
+}
+
+.animate-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 文章卡片交错动画 */
+.article.animate-on-scroll:nth-child(odd) {
+    transition-delay: 0.05s;
+}
+
+.article.animate-on-scroll:nth-child(even) {
+    transition-delay: 0.15s;
+}
+
+/* 评论交错动画 */
+.comment.animate-on-scroll {
+    transition-delay: calc(var(--comment-index, 0) * 0.05s + 0.1s);
+}
+
+/* 分页动画 */
+.pagination.animate-on-scroll {
+    transition-delay: 0.3s;
+}
+

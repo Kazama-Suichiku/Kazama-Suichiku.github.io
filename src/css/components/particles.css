@@ -1,0 +1,22 @@
+/**
+ * 粒子动画背景样式
+ */
+
+#particles-js {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-color: var(--color-bg-light);
+    transition: background-color var(--transition-normal);
+    pointer-events: none;
+    transform: translate3d(0, 0, 0);
+    transition: background-color var(--transition-normal), transform 0.35s cubic-bezier(.22, .9, .2, 1);
+}
+
+html.dark-mode #particles-js {
+    background-color: var(--color-bg-dark);
+}
+

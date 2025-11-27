@@ -1,0 +1,710 @@
+/**
+ * 表单组件样式
+ */
+
+/* 基础表单样式 */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+    margin-bottom: var(--space-xl);
+    position: relative;
+    padding: var(--space-l);
+    background-color: var(--color-surface-light);
+    border-radius: var(--radius-m);
+    border: 1px solid var(--color-border-light);
+    box-shadow: 0 2px 6px var(--color-shadow-light);
+}
+
+.filters select,
+.filters input {
+    padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-s);
+    font-size: 15px;
+    background-color: var(--color-bg-light);
+    color: var(--color-text-light);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.filters select:focus,
+.filters input:focus {
+    border-color: var(--color-primary-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-highlight-light);
+}
+
+.filters select {
+    min-width: 180px;
+    cursor: pointer;
+}
+
+.filters input {
+    flex-grow: 1;
+}
+
+/* 搜索建议 */
+.search-suggestions {
+    position: absolute;
+    background-color: var(--color-surface-light);
+    border: 1px solid var(--color-border-light);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    z-index: 10;
+    top: calc(100% - 1px);
+    left: 196px;
+    width: calc(100% - 196px);
+    box-shadow: 0 6px 12px var(--color-shadow-light);
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.suggestion {
+    padding: var(--space-s) var(--space-m);
+    cursor: pointer;
+    font-size: var(--font-size-s);
+    border-bottom: 1px solid var(--color-border-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color var(--transition-fast);
+}
+
+.suggestion:last-child {
+    border-bottom: none;
+}
+
+.suggestion:hover {
+    background-color: var(--color-highlight-light);
+}
+
+/* 新文章/编辑文章表单 */
+.new-article-toggle {
+    margin-bottom: var(--space-xl);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-m);
+    background-color: var(--color-surface-light);
+    transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+    box-shadow: 0 2px 6px var(--color-shadow-light);
+    overflow: hidden;
+}
+
+.new-article-toggle summary {
+    padding: var(--space-m) var(--space-l);
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--color-primary-light);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-heading);
+    font-size: var(--font-size-l);
+    transition: background-color var(--transition-fast);
+}
+
+.new-article-toggle summary:hover {
+    background-color: var(--color-highlight-light);
+}
+
+.new-article-toggle summary::-webkit-details-marker {
+    display: none;
+}
+
+.new-article-toggle summary::after {
+    content: '▼';
+    margin-left: var(--space-s);
+    display: inline-block;
+    transition: transform var(--transition-fast);
+    font-size: 13px;
+}
+
+.new-article-toggle[open] summary::after {
+    transform: rotate(-180deg);
+}
+
+.new-article-toggle[open] {
+    box-shadow: 0 4px 10px var(--color-shadow-light);
+}
+
+.new-article-toggle[open] > form {
+    border-top: 1px solid var(--color-border-light);
+}
+
+.new-article-form,
+.edit-article-form {
+    padding: var(--space-xl);
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+}
+
+.new-article-form label,
+.edit-article-form label {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: var(--space-xs);
+    display: block;
+    color: var(--color-text-muted-light);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.new-article-form input,
+.new-article-form select,
+.new-article-form textarea,
+.edit-article-form input,
+.edit-article-form select,
+.edit-article-form textarea {
+    padding: var(--space-m);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-s);
+    font-size: var(--font-size-m);
+    background-color: var(--color-bg-light);
+    color: var(--color-text-light);
+    width: 100%;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    font-family: var(--font-body);
+}
+
+.new-article-form textarea,
+.edit-article-form textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.new-article-form input:focus,
+.new-article-form select:focus,
+.new-article-form textarea:focus,
+.edit-article-form input:focus,
+.edit-article-form select:focus,
+.edit-article-form textarea:focus {
+    border-color: var(--color-primary-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-highlight-light);
+}
+
+/* 图片预览 */
+.image-preview {
+    display: flex;
+    gap: var(--space-m);
+    flex-wrap: wrap;
+    margin-top: var(--space-s);
+    padding: var(--space-m);
+    background-color: var(--color-bg-light);
+    border-radius: var(--radius-s);
+    min-height: 90px;
+    border: 1px dashed var(--color-border-light);
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.image-preview p {
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    color: var(--color-text-muted-light);
+    font-size: var(--font-size-s);
+}
+
+.image-container {
+    position: relative;
+    margin-bottom: 0;
+}
+
+.image-container img {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-s);
+    display: block;
+    border: 1px solid var(--color-border-light);
+    cursor: pointer;
+    object-fit: cover;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.image-container img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px var(--color-shadow-light);
+}
+
+.image-container .delete-image {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: rgba(200, 50, 50, 0.9);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--radius-full);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: var(--font-size-s);
+    font-weight: bold;
+    line-height: 22px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    z-index: 1;
+}
+
+.image-container .delete-image:hover {
+    background-color: #e74c3c;
+    transform: scale(1.15);
+}
+
+.new-article-form button,
+.edit-article-form button {
+    padding: var(--space-m) var(--space-l);
+    background-color: var(--color-primary-light);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    align-self: flex-start;
+    margin-top: var(--space-m);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.edit-article-form #cancelEditButton {
+    background-color: var(--color-text-muted-light);
+}
+
+.new-article-form button:hover,
+.edit-article-form button[type="submit"]:hover {
+    background-color: var(--color-primary-dark-light);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.edit-article-form #cancelEditButton:hover {
+    background-color: var(--color-text-light);
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* 评论表单 */
+#commentForm {
+    padding: var(--space-xl);
+    border-top: 1px solid var(--color-border-light);
+    margin-top: var(--space-xl);
+    background-color: var(--color-surface-light);
+    border-radius: var(--radius-m);
+    box-shadow: 0 2px 6px var(--color-shadow-light);
+    transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+#commentForm h3 {
+    margin: 0 0 var(--space-l) 0;
+    font-size: 21px;
+    color: var(--color-text-light);
+    text-align: center;
+}
+
+#commentForm label {
+    font-weight: 700;
+    font-size: var(--font-size-s);
+    margin-bottom: var(--space-xs);
+    display: block;
+    color: var(--color-text-muted-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#commentForm input,
+#commentForm textarea {
+    padding: var(--space-m);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-s);
+    font-size: var(--font-size-m);
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--color-bg-light);
+    color: var(--color-text-light);
+    margin-bottom: var(--space-m);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    font-family: var(--font-body);
+}
+
+#commentForm input:focus,
+#commentForm textarea:focus {
+    border-color: var(--color-primary-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-highlight-light);
+}
+
+#commentForm textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+#commentForm button {
+    padding: var(--space-m) var(--space-l);
+    background-color: var(--color-primary-light);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    align-self: flex-start;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    margin-top: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+#commentForm button:hover {
+    background-color: var(--color-primary-dark-light);
+    transform: translateY(-2px);
+}
+
+/* 字数统计 */
+.char-count {
+    font-size: 13px;
+    color: var(--color-text-muted-light);
+    margin-top: -8px;
+    margin-bottom: var(--space-s);
+    text-align: right;
+}
+
+/* 内联回复表单 */
+.reply-form-container {
+    margin-top: var(--space-m);
+    padding-left: var(--space-l);
+    padding-top: var(--space-m);
+    border-top: 1px dashed var(--color-border-light);
+    animation: fadeInReplyForm 0.3s ease-out;
+}
+
+@keyframes fadeInReplyForm {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.inline-reply-form {
+    background-color: var(--color-bg-light);
+    padding: var(--space-m);
+    border-radius: 6px;
+    border: 1px solid var(--color-border-light);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.inline-reply-form label {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: var(--space-xs);
+    display: block;
+    color: var(--color-text-muted-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.inline-reply-form input[type="text"],
+.inline-reply-form textarea {
+    width: 100%;
+    padding: var(--space-s);
+    font-size: var(--font-size-s);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-s);
+    margin-bottom: var(--space-s);
+    background-color: var(--color-surface-light);
+    color: var(--color-text-light);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.inline-reply-form input[type="text"]:focus,
+.inline-reply-form textarea:focus {
+    border-color: var(--color-primary-light);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-highlight-light);
+}
+
+.inline-reply-form textarea {
+    min-height: 60px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.inline-reply-form .reply-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-s);
+    margin-top: var(--space-s);
+}
+
+.inline-reply-form button {
+    padding: var(--space-xs) var(--space-m);
+    font-size: var(--font-size-s);
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.inline-reply-form button.submit-reply {
+    background-color: var(--color-primary-light);
+    color: white;
+}
+
+.inline-reply-form button.submit-reply:hover {
+    background-color: var(--color-primary-dark-light);
+    transform: translateY(-1px);
+}
+
+.inline-reply-form button.cancel-reply {
+    background-color: transparent;
+    color: var(--color-text-muted-light);
+    border: 1px solid var(--color-border-light);
+}
+
+.inline-reply-form button.cancel-reply:hover {
+    background-color: var(--color-border-light);
+    color: var(--color-text-light);
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode .filters {
+    background-color: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: 0 2px 6px var(--color-shadow-dark);
+}
+
+body.dark-mode .filters select,
+body.dark-mode .filters input {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .filters select:focus,
+body.dark-mode .filters input:focus {
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 0 0 3px var(--color-highlight-dark);
+}
+
+body.dark-mode .search-suggestions {
+    background-color: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: 0 6px 12px var(--color-shadow-dark);
+}
+
+body.dark-mode .suggestion {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .suggestion:hover {
+    background-color: var(--color-highlight-dark);
+}
+
+body.dark-mode .new-article-toggle {
+    border-color: var(--color-border-dark);
+    background-color: var(--color-surface-dark);
+    box-shadow: 0 2px 6px var(--color-shadow-dark);
+}
+
+body.dark-mode .new-article-toggle summary {
+    color: var(--color-primary-dark);
+}
+
+body.dark-mode .new-article-toggle summary:hover {
+    background-color: var(--color-highlight-dark);
+}
+
+body.dark-mode .new-article-toggle[open] {
+    background-color: rgba(59, 66, 82, 0.9);
+}
+
+body.dark-mode .new-article-toggle[open] > form {
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .new-article-form label,
+body.dark-mode .edit-article-form label {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .new-article-form input,
+body.dark-mode .new-article-form select,
+body.dark-mode .new-article-form textarea,
+body.dark-mode .edit-article-form input,
+body.dark-mode .edit-article-form select,
+body.dark-mode .edit-article-form textarea {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .image-preview {
+    background-color: var(--color-bg-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .image-preview p {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .image-container img {
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .image-container .delete-image {
+    background-color: rgba(200, 80, 80, 0.9);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .image-container .delete-image:hover {
+    background-color: #d35f5f;
+}
+
+body.dark-mode .new-article-form button,
+body.dark-mode .edit-article-form button[type="submit"] {
+    background-color: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .edit-article-form #cancelEditButton {
+    background-color: #666;
+}
+
+body.dark-mode .new-article-form button:hover,
+body.dark-mode .edit-article-form button[type="submit"]:hover {
+    background-color: var(--color-primary-dark-dark);
+}
+
+body.dark-mode .edit-article-form #cancelEditButton:hover {
+    background-color: #888;
+}
+
+body.dark-mode #commentForm {
+    border-color: var(--color-border-dark);
+    background-color: var(--color-surface-dark);
+    box-shadow: 0 2px 6px var(--color-shadow-dark);
+}
+
+body.dark-mode #commentForm h3 {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode #commentForm label {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode #commentForm input,
+body.dark-mode #commentForm textarea {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode #commentForm input:focus,
+body.dark-mode #commentForm textarea:focus {
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 0 0 3px var(--color-highlight-dark);
+}
+
+body.dark-mode #commentForm button {
+    background-color: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode #commentForm button:hover {
+    background-color: var(--color-primary-dark-dark);
+}
+
+body.dark-mode .char-count {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .reply-form-container {
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .inline-reply-form {
+    background-color: var(--color-bg-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .inline-reply-form label {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .inline-reply-form input[type="text"],
+body.dark-mode .inline-reply-form textarea {
+    background-color: var(--color-surface-dark);
+    color: var(--color-text-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .inline-reply-form input[type="text"]:focus,
+body.dark-mode .inline-reply-form textarea:focus {
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 0 0 2px var(--color-highlight-dark);
+}
+
+body.dark-mode .inline-reply-form button.submit-reply {
+    background-color: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .inline-reply-form button.submit-reply:hover {
+    background-color: var(--color-primary-dark-dark);
+}
+
+body.dark-mode .inline-reply-form button.cancel-reply {
+    background-color: transparent;
+    color: var(--color-text-muted-dark);
+    border: 1px solid var(--color-border-dark);
+}
+
+body.dark-mode .inline-reply-form button.cancel-reply:hover {
+    background-color: var(--color-border-dark);
+    color: var(--color-text-dark);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 700px) {
+    #commentForm {
+        padding: var(--space-m);
+    }
+    
+    .image-preview {
+        padding: var(--space-s);
+        gap: var(--space-s);
+    }
+    
+    .image-container img {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+@media (max-width: 500px) {
+    #commentForm {
+        padding: var(--space-s);
+        border-radius: var(--radius-s);
+    }
+    
+    .image-container img {
+        width: 40px;
+        height: 40px;
+    }
+}
+

@@ -1,0 +1,311 @@
+/**
+ * 模态框组件样式
+ */
+
+/* 图片模态框 */
+.image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(30, 30, 35, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: var(--space-l);
+    box-sizing: border-box;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.image-modal img {
+    max-width: 95%;
+    max-height: 95%;
+    object-fit: contain;
+    cursor: default;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border-radius: var(--radius-s);
+}
+
+.image-modal .close {
+    position: absolute;
+    top: var(--space-m);
+    right: var(--space-l);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 45px;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    padding: var(--space-s);
+    transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.image-modal .close:hover {
+    color: #fff;
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* 认证模态框 */
+.auth-modal {
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(40, 60, 80, 0.18);
+    animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.auth-modal-content {
+    background: var(--color-surface-light);
+    color: var(--color-text-light);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(90, 125, 154, 0.18);
+    padding: 38px 36px 28px 36px;
+    min-width: 340px;
+    max-width: 90vw;
+    position: relative;
+    font-family: var(--font-body);
+    animation: slideInAuth 0.3s;
+}
+
+@keyframes slideInAuth {
+    from {
+        transform: translateY(-40px);
+        opacity: 0;
+    }
+    to {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+}
+
+.auth-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    font-size: var(--font-size-l);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--color-primary-light);
+    padding: 10px 0 8px 0;
+    border-bottom: 2.5px solid transparent;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.auth-tab.active {
+    color: var(--color-primary-dark-light);
+    border-bottom: 2.5px solid var(--color-primary-dark-light);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.auth-form label {
+    font-size: 13px;
+    color: var(--color-text-muted-light);
+    font-weight: 700;
+    margin-bottom: 2px;
+    margin-top: 6px;
+}
+
+.auth-form input {
+    padding: 12px 14px;
+    border: 1.5px solid var(--color-border-light);
+    border-radius: 6px;
+    font-size: 15px;
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+    transition: border-color 0.2s;
+}
+
+.auth-form input:focus {
+    border-color: var(--color-primary-light);
+    outline: none;
+}
+
+.auth-form button {
+    margin-top: 10px;
+    padding: 12px 0;
+    background: var(--color-primary-light);
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-size: var(--font-size-m);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.auth-form button:hover {
+    background: var(--color-primary-dark-light);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.auth-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--color-text-muted-light);
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    width: 36px;
+    height: 36px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.auth-modal-close:hover {
+    background: var(--color-highlight-light);
+    color: var(--color-primary-light);
+}
+
+.auth-modal-status {
+    min-height: 22px;
+    font-size: var(--font-size-s);
+    color: var(--color-text-muted-light);
+    margin: 8px 0 0 0;
+    text-align: center;
+}
+
+.auth-modal-status.error {
+    color: #d16060;
+}
+
+.auth-modal-status.success {
+    color: #6aae6a;
+}
+
+/* 头部认证状态 */
+.auth-header-status {
+    font-size: 15px;
+    color: var(--color-primary-light);
+    margin-right: var(--space-s);
+}
+
+.auth-header-logout-btn {
+    background: var(--color-accent-light);
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    padding: 6px 18px;
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: background 0.2s;
+}
+
+.auth-header-logout-btn:hover {
+    background: #b07c4a;
+}
+
+.auth-header-open-btn {
+    background: var(--color-primary-light);
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    padding: 8px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-left: var(--space-s);
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--color-shadow-light);
+    transition: background 0.2s, transform 0.2s;
+}
+
+.auth-header-open-btn:hover {
+    background: var(--color-primary-dark-light);
+    transform: translateY(-2px) scale(1.03);
+}
+
+/* 评论登录提示 */
+.comment-login-tips {
+    color: #d16060;
+    text-align: center;
+    margin: var(--space-l) 0 0 0;
+    font-size: 15px;
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode .auth-modal-content {
+    background: var(--color-surface-dark);
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .auth-form input {
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    border-color: var(--color-border-dark);
+}
+
+body.dark-mode .auth-form input:focus {
+    border-color: var(--color-primary-dark);
+}
+
+body.dark-mode .auth-form button {
+    background: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .auth-form button:hover {
+    background: var(--color-primary-dark-dark);
+}
+
+body.dark-mode .auth-modal-close {
+    color: var(--color-text-muted-dark);
+}
+
+body.dark-mode .auth-modal-close:hover {
+    background: var(--color-highlight-dark);
+    color: var(--color-primary-dark);
+}
+
+body.dark-mode .auth-header-status {
+    color: var(--color-primary-dark);
+}
+
+body.dark-mode .auth-header-logout-btn {
+    background: var(--color-accent-dark);
+    color: var(--color-bg-dark);
+}
+
+body.dark-mode .auth-header-logout-btn:hover {
+    background: #b08c6a;
+}
+
+body.dark-mode .auth-header-open-btn {
+    background: var(--color-primary-dark);
+    color: var(--color-bg-dark);
+    box-shadow: 0 2px 8px var(--color-shadow-dark);
+}
+
+body.dark-mode .auth-header-open-btn:hover {
+    background: var(--color-primary-dark-dark);
+}
+

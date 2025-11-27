@@ -6,55 +6,59 @@
     <title>翠竹的博客</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E🎋%3C/text%3E%3C/svg%3E">
 
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 
-    <!-- 添加Font Awesome用于GitHub图标 -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- 添加particles.js库 -->
+    
+    <!-- Particles.js -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
-    <!-- Firebase App (核心) -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <!-- Firebase Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <script>
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-        apiKey: "AIzaSyAU2iWEKT1qi8B3Fg1JHTfhFC_SQmyOF2k",
-        authDomain: "my-blog-fa883.firebaseapp.com",
-        databaseURL: "https://my-blog-fa883-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "my-blog-fa883",
-        storageBucket: "my-blog-fa883.firebasestorage.app",
-        messagingSenderId: "142782336652",
-        appId: "1:142782336652:web:18e907b3e4510bfb2eb5a9",
-        measurementId: "G-TZ7XSZTECY"
-    };
-    firebase.initializeApp(firebaseConfig);
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyAU2iWEKT1qi8B3Fg1JHTfhFC_SQmyOF2k",
+            authDomain: "my-blog-fa883.firebaseapp.com",
+            databaseURL: "https://my-blog-fa883-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "my-blog-fa883",
+            storageBucket: "my-blog-fa883.firebasestorage.app",
+            messagingSenderId: "142782336652",
+            appId: "1:142782336652:web:18e907b3e4510bfb2eb5a9",
+            measurementId: "G-TZ7XSZTECY"
+        };
+        firebase.initializeApp(firebaseConfig);
     </script>
-    <!-- 以上为Firebase初始化 -->
 
     <!-- EasyMDE Markdown 编辑器 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
     <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-    <!-- marked.js 用于 Markdown 渲染 -->
+    
+    <!-- Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- DOMPurify 用于 Markdown 渲染安全过滤 -->
+    
+    <!-- DOMPurify -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-    <!-- highlight.js 用于代码高亮（同时加载明暗主题，脚本将按主题启用） -->
+    
+    <!-- Highlight.js -->
     <link id="hl-theme-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
     <link id="hl-theme-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 
-    <link rel="stylesheet" href="styles.css">
+    <!-- 主样式 -->
+    <link rel="stylesheet" href="src/css/main.css">
 </head>
 <body>
-    <!-- 粒子动画背景容器 -->
+    <!-- 粒子动画背景 -->
     <div id="particles-js"></div>
 
+    <!-- 头部导航 -->
     <header>
         <nav>
             <a href="#home" class="logo-link" title="返回首页">
@@ -71,131 +75,60 @@
         </nav>
     </header>
 
+    <!-- 主容器 -->
     <div class="container">
+        <!-- 侧边栏 -->
         <aside class="sidebar">
             <div class="profile animate-on-scroll">
-                <img class="avatar" id="profileAvatar" src="" loading="lazy" style="background: linear-gradient(135deg, #7fd7e7 0%, #b4e19e 100%);">
+                <img class="avatar" id="profileAvatar" src="" loading="lazy" alt="头像" style="background: linear-gradient(135deg, #7fd7e7 0%, #b4e19e 100%);">
                 <h2 class="profile-name">Kazama_Suichiku</h2>
                 <p class="profile-bio">游戏技术美术爱好者。分享学习历程，记录点滴思考。希望我们都能学有所成！</p>
+                
+                <!-- 头像上传（仅登录用户可见） -->
                 <div id="avatarUploadSection" style="display:none;">
                     <label for="avatarInput" class="avatar-upload-label">更换头像</label>
                     <input type="file" id="avatarInput" accept="image/jpeg,image/png" style="display: none;">
                     <img id="avatarPreview" class="avatar-preview" alt="头像预览">
                     <button id="uploadAvatarButton" disabled>上传新头像</button>
                 </div>
+                
+                <!-- 联系方式 -->
                 <div class="contact">
                     <h3>联系方式</h3>
-                    <p><a href="https://www.zhihu.com/people/48-52-52-27-65" target="_blank" rel="noopener noreferrer" title="知乎主页"><span class="icon zhihu"></span> 知乎</a></p>
-                    <p><a href="https://space.bilibili.com/56807642?spm_id_from=333.788.0.0" target="_blank" rel="noopener noreferrer" title="Bilibili 主页"><span class="icon bilibili"></span> Bilibili</a></p>
-                    <p><a href="https://github.com/Kazama-Suichiku" target="_blank" rel="noopener noreferrer" title="GitHub 主页"><span class="icon github"><i class="fab fa-github"></i></span> GitHub</a></p>
+                    <p>
+                        <a href="https://www.zhihu.com/people/48-52-52-27-65" target="_blank" rel="noopener noreferrer" title="知乎主页">
+                            <span class="icon zhihu"></span> 知乎
+                        </a>
+                    </p>
+                    <p>
+                        <a href="https://space.bilibili.com/56807642?spm_id_from=333.788.0.0" target="_blank" rel="noopener noreferrer" title="Bilibili 主页">
+                            <span class="icon bilibili"></span> Bilibili
+                        </a>
+                    </p>
+                    <p>
+                        <a href="https://github.com/Kazama-Suichiku" target="_blank" rel="noopener noreferrer" title="GitHub 主页">
+                            <span class="icon github"><i class="fab fa-github"></i></span> GitHub
+                        </a>
+                    </p>
                 </div>
             </div>
         </aside>
+        
+        <!-- 主内容区 -->
         <main id="content">
             <p style="text-align:center; padding: 50px; color: #888;">加载中...</p>
         </main>
     </div>
 
+    <!-- 页脚 -->
     <footer>
         <p>© <span id="currentYear"></span> 翠竹的博客. All rights reserved.</p>
     </footer>
 
+    <!-- 返回顶部按钮 -->
     <button class="back-to-top" title="返回顶部">↑</button>
 
-    <script src="script.js"></script>
-    <script>
-    // 登录状态下显示头像上传，否则显示渐变默认头像且不可更改
-    function updateAvatarUI(isLoggedIn, avatarUrl) {
-        const avatar = document.getElementById('profileAvatar');
-        const uploadSection = document.getElementById('avatarUploadSection');
-        if (!avatar || !uploadSection) return;
-        if (isLoggedIn) {
-            uploadSection.style.display = '';
-            avatar.style.background = '';
-            avatar.src = avatarUrl || '';
-        } else {
-            uploadSection.style.display = 'none';
-            avatar.src = '';
-            avatar.style.background = 'linear-gradient(135deg, #7fd7e7 0%, #b4e19e 100%)';
-        }
-    }
-    // 你需要在登录/登出状态变化时调用 updateAvatarUI(isLoggedIn, avatarUrl)
-    </script>
-    <!-- Code injected by live-server -->
-    <script>
-        // <![CDATA[  <-- For SVG support
-        if ('WebSocket' in window) {
-            (function () {
-                function refreshCSS() {
-                    var sheets = [].slice.call(document.getElementsByTagName("link"));
-                    var head = document.getElementsByTagName("head")[0];
-                    for (var i = 0; i < sheets.length; ++i) {
-                        var elem = sheets[i];
-                        var parent = elem.parentElement || head;
-                        parent.removeChild(elem);
-                        var rel = elem.rel;
-                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-                        }
-                        parent.appendChild(elem);
-                    }
-                }
-                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-                var address = protocol + window.location.host + window.location.pathname + '/ws';
-                var socket = new WebSocket(address);
-                socket.onmessage = function (msg) {
-                    if (msg.data == 'reload') window.location.reload();
-                    else if (msg.data == 'refreshcss') refreshCSS();
-                };
-                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-                    console.log('Live reload enabled.');
-                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-                }
-            })();
-        }
-        else {
-            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-        }
-        // ]]>
-    </script>
-<!-- Code injected by live-server -->
-<script>
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-		(function () {
-			function refreshCSS() {
-				var sheets = [].slice.call(document.getElementsByTagName("link"));
-				var head = document.getElementsByTagName("head")[0];
-				for (var i = 0; i < sheets.length; ++i) {
-					var elem = sheets[i];
-					var parent = elem.parentElement || head;
-					parent.removeChild(elem);
-					var rel = elem.rel;
-					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-					}
-					parent.appendChild(elem);
-				}
-			}
-			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-			var address = protocol + window.location.host + window.location.pathname + '/ws';
-			var socket = new WebSocket(address);
-			socket.onmessage = function (msg) {
-				if (msg.data == 'reload') window.location.reload();
-				else if (msg.data == 'refreshcss') refreshCSS();
-			};
-			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-				console.log('Live reload enabled.');
-				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-			}
-		})();
-	}
-	else {
-		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-	}
-	// ]]>
-</script>
+    <!-- 主脚本 -->
+    <script type="module" src="src/js/app.js"></script>
 </body>
 </html>
