@@ -85,7 +85,18 @@ async function handleRequest(request) {
         firebasePath += '.json';
     }
     
-    const firebaseUrl = `${FIREBASE_URL}${firebasePath}${url.search}`;
+    let firebaseUrl = `${FIREBASE_URL}${firebasePath}${url.search}`;
+    
+    // Firebase REST 写入需带 ID Token：?auth=<token>。浏览器通过 Authorization 传给 Worker，再转发到 Firebase。
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.slice(7).trim();
+        if (token) {
+            const fbUrl = new URL(firebaseUrl);
+            fbUrl.searchParams.set('auth', token);
+            firebaseUrl = fbUrl.toString();
+        }
+    }
     
     // 构建请求
     const requestInit = {

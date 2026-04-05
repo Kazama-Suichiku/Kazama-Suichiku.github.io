@@ -198,9 +198,13 @@ export async function getData(path) {
  * @returns {Promise}
  */
 export async function setData(path, data) {
-    // 如果使用代理模式，通过 Worker 写入数据
+    // 如果使用代理模式，通过 Worker 写入数据（Firebase REST 需带 ID Token，否则 401）
     if (isUsingProxy()) {
-        return proxySet(path, data);
+        const token = await getIdToken();
+        if (!token) {
+            throw new Error('请先登录后再操作');
+        }
+        return proxySet(path, data, token);
     }
     
     return getRef(path).set(data);
@@ -215,7 +219,11 @@ export async function setData(path, data) {
 export async function pushData(path, data) {
     // 如果使用代理模式，通过 Worker 推送数据
     if (isUsingProxy()) {
-        const result = await proxyPush(path, data);
+        const token = await getIdToken();
+        if (!token) {
+            throw new Error('请先登录后再操作');
+        }
+        const result = await proxyPush(path, data, token);
         return result.name; // Firebase REST API 返回 { name: "生成的key" }
     }
     
@@ -232,7 +240,11 @@ export async function pushData(path, data) {
 export async function removeData(path) {
     // 如果使用代理模式，通过 Worker 删除数据
     if (isUsingProxy()) {
-        return proxyDelete(path);
+        const token = await getIdToken();
+        if (!token) {
+            throw new Error('请先登录后再操作');
+        }
+        return proxyDelete(path, token);
     }
     
     return getRef(path).remove();

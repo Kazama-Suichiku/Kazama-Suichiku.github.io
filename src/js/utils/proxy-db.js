@@ -9,6 +9,22 @@ import { PROXY_CONFIG, FIREBASE_CONFIG } from '../config.js';
 let useProxy = false;
 let proxyChecked = false;
 
+/** 带重试的 fetch（缓解偶发 ERR_CONNECTION_CLOSED） */
+async function fetchWithRetry(url, init, retries = 2, delayMs = 400) {
+    let lastError;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            return await fetch(url, init);
+        } catch (e) {
+            lastError = e;
+            if (attempt < retries) {
+                await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+            }
+        }
+    }
+    throw lastError;
+}
+
 /**
  * 检测是否需要使用代理
  * 支持强制代理模式和自动检测模式
@@ -111,7 +127,7 @@ export async function proxyGet(path) {
     const url = `${PROXY_CONFIG.url}/${path}`;
     
     try {
-        const response = await fetch(url, {
+        const response = await fetchWithRetry(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -133,17 +149,22 @@ export async function proxyGet(path) {
  * 通过代理写入数据
  * @param {string} path - 数据路径
  * @param {any} data - 数据
+ * @param {string|null} [idToken] - Firebase ID Token（写入 Firebase 规则要求 auth 时必填）
  * @returns {Promise<any>}
  */
-export async function proxySet(path, data) {
+export async function proxySet(path, data, idToken = null) {
     const url = `${PROXY_CONFIG.url}/${path}`;
     
     try {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (idToken) {
+            headers['Authorization'] = `Bearer ${idToken}`;
+        }
         const response = await fetch(url, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers,
             body: JSON.stringify(data)
         });
         
@@ -162,17 +183,22 @@ export async function proxySet(path, data) {
  * 通过代理推送数据（自动生成 key）
  * @param {string} path - 数据路径
  * @param {any} data - 数据
+ * @param {string|null} [idToken] - Firebase ID Token
  * @returns {Promise<{name: string}>} - 返回包含生成的 key 的对象
  */
-export async function proxyPush(path, data) {
+export async function proxyPush(path, data, idToken = null) {
     const url = `${PROXY_CONFIG.url}/${path}`;
     
     try {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (idToken) {
+            headers['Authorization'] = `Bearer ${idToken}`;
+        }
         const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers,
             body: JSON.stringify(data)
         });
         
@@ -189,18 +215,22 @@ export async function proxyPush(path, data) {
 
 /**
  * 通过代理删除数据
- * @param {string} path - 数据路径
+ * @param {string|null} [idToken] - Firebase ID Token
  * @returns {Promise<any>}
  */
-export async function proxyDelete(path) {
+export async function proxyDelete(path, idToken = null) {
     const url = `${PROXY_CONFIG.url}/${path}`;
     
     try {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (idToken) {
+            headers['Authorization'] = `Bearer ${idToken}`;
+        }
         const response = await fetch(url, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers
         });
         
         if (!response.ok) {
@@ -218,17 +248,22 @@ export async function proxyDelete(path) {
  * 通过代理更新数据（PATCH）
  * @param {string} path - 数据路径
  * @param {any} data - 要更新的数据
+ * @param {string|null} [idToken] - Firebase ID Token
  * @returns {Promise<any>}
  */
-export async function proxyUpdate(path, data) {
+export async function proxyUpdate(path, data, idToken = null) {
     const url = `${PROXY_CONFIG.url}/${path}`;
     
     try {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (idToken) {
+            headers['Authorization'] = `Bearer ${idToken}`;
+        }
         const response = await fetch(url, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers,
             body: JSON.stringify(data)
         });
         
