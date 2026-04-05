@@ -119,12 +119,28 @@ export function isUsingProxy() {
 }
 
 /**
+ * 构造代理请求 URL。Firebase REST 支持 ?auth=idToken；Worker 会把查询串转发到 Firebase。
+ * 仅依赖 Header 时，若线上 Worker 未重新部署则仍会 401，故写入类请求必须带 query。
+ * @param {string} path
+ * @param {string|null} [idToken]
+ */
+function buildProxyUrl(path, idToken = null) {
+    const base = `${PROXY_CONFIG.url.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+    if (!idToken) {
+        return base;
+    }
+    const u = new URL(base);
+    u.searchParams.set('auth', idToken);
+    return u.toString();
+}
+
+/**
  * 通过代理读取数据
  * @param {string} path - 数据路径
  * @returns {Promise<any>}
  */
 export async function proxyGet(path) {
-    const url = `${PROXY_CONFIG.url}/${path}`;
+    const url = buildProxyUrl(path);
     
     try {
         const response = await fetchWithRetry(url, {
@@ -153,7 +169,7 @@ export async function proxyGet(path) {
  * @returns {Promise<any>}
  */
 export async function proxySet(path, data, idToken = null) {
-    const url = `${PROXY_CONFIG.url}/${path}`;
+    const url = buildProxyUrl(path, idToken);
     
     try {
         const headers = {
@@ -187,7 +203,7 @@ export async function proxySet(path, data, idToken = null) {
  * @returns {Promise<{name: string}>} - 返回包含生成的 key 的对象
  */
 export async function proxyPush(path, data, idToken = null) {
-    const url = `${PROXY_CONFIG.url}/${path}`;
+    const url = buildProxyUrl(path, idToken);
     
     try {
         const headers = {
@@ -219,7 +235,7 @@ export async function proxyPush(path, data, idToken = null) {
  * @returns {Promise<any>}
  */
 export async function proxyDelete(path, idToken = null) {
-    const url = `${PROXY_CONFIG.url}/${path}`;
+    const url = buildProxyUrl(path, idToken);
     
     try {
         const headers = {
@@ -252,7 +268,7 @@ export async function proxyDelete(path, idToken = null) {
  * @returns {Promise<any>}
  */
 export async function proxyUpdate(path, data, idToken = null) {
-    const url = `${PROXY_CONFIG.url}/${path}`;
+    const url = buildProxyUrl(path, idToken);
     
     try {
         const headers = {
