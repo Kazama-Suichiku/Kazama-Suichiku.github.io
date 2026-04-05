@@ -75,6 +75,25 @@ let mouseY = 0;
 let glowX = 0;
 let glowY = 0;
 let animationId = null;
+let glowMoveHandler = null;
+let glowLeaveHandler = null;
+let glowVisibilityHandler = null;
+let lastPointerMoveAt = 0;
+let glowInitialized = false;
+
+function getEffectsProfile() {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const saveData = navigator.connection?.saveData === true;
+    const cores = navigator.hardwareConcurrency || 4;
+    const memory = navigator.deviceMemory || 4;
+
+    return {
+        reducedMotion,
+        saveData,
+        lowEndDevice: cores <= 4 || memory <= 4,
+        disableContinuousEffects: reducedMotion || saveData || cores <= 4 || memory <= 4
+    };
+}
 
 /**
  * 创建鼠标跟随光效元素
@@ -91,46 +110,83 @@ function createMouseGlow() {
  * 更新光效位置（使用缓动效果）
  */
 function updateGlowPosition() {
-    // 缓动系数，越小越平滑
-    const ease = 0.15;
-    
-    glowX += (mouseX - glowX) * ease;
-    glowY += (mouseY - glowY) * ease;
-    
-    if (mouseGlow) {
-        mouseGlow.style.left = `${glowX}px`;
-        mouseGlow.style.top = `${glowY}px`;
+    if (!mouseGlow) {
+        animationId = null;
+        return;
     }
+
+    // 缓动系数，越小越平滑
+    const ease = 0.18;
+    const dx = mouseX - glowX;
+    const dy = mouseY - glowY;
     
-    animationId = requestAnimationFrame(updateGlowPosition);
+    glowX += dx * ease;
+    glowY += dy * ease;
+    
+    mouseGlow.style.transform = `translate(${glowX}px, ${glowY}px) translate(-50%, -50%)`;
+    
+    const pointerIsActive = performance.now() - lastPointerMoveAt < 120;
+    const stillMoving = Math.abs(dx) > 0.35 || Math.abs(dy) > 0.35;
+
+    if (pointerIsActive || stillMoving) {
+        animationId = requestAnimationFrame(updateGlowPosition);
+    } else {
+        animationId = null;
+    }
+}
+
+function ensureGlowAnimation() {
+    if (!animationId) {
+        animationId = requestAnimationFrame(updateGlowPosition);
+    }
 }
 
 /**
  * 初始化鼠标跟随光效
  */
 export function initMouseGlow() {
+    const profile = getEffectsProfile();
+
     // 移动端不启用
-    if (window.innerWidth < 768) return;
+    if (window.innerWidth < 768 || profile.disableContinuousEffects) return;
     
     createMouseGlow();
-    
-    document.addEventListener('mousemove', (e) => {
+
+    if (glowMoveHandler) return;
+
+    glowMoveHandler = (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-        
+        lastPointerMoveAt = performance.now();
+
+        if (!glowInitialized) {
+            glowX = mouseX;
+            glowY = mouseY;
+            glowInitialized = true;
+        }
+
         if (mouseGlow && !mouseGlow.classList.contains('visible')) {
             mouseGlow.classList.add('visible');
         }
-    });
-    
-    document.addEventListener('mouseleave', () => {
+
+        ensureGlowAnimation();
+    };
+
+    glowLeaveHandler = () => {
         if (mouseGlow) {
             mouseGlow.classList.remove('visible');
         }
-    });
-    
-    // 启动动画循环
-    updateGlowPosition();
+    };
+
+    glowVisibilityHandler = () => {
+        if (document.hidden && mouseGlow) {
+            mouseGlow.classList.remove('visible');
+        }
+    };
+
+    document.addEventListener('mousemove', glowMoveHandler, { passive: true });
+    document.addEventListener('mouseleave', glowLeaveHandler);
+    document.addEventListener('visibilitychange', glowVisibilityHandler);
 }
 
 /**
@@ -139,11 +195,25 @@ export function initMouseGlow() {
 export function destroyMouseGlow() {
     if (animationId) {
         cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+    if (glowMoveHandler) {
+        document.removeEventListener('mousemove', glowMoveHandler);
+        glowMoveHandler = null;
+    }
+    if (glowLeaveHandler) {
+        document.removeEventListener('mouseleave', glowLeaveHandler);
+        glowLeaveHandler = null;
+    }
+    if (glowVisibilityHandler) {
+        document.removeEventListener('visibilitychange', glowVisibilityHandler);
+        glowVisibilityHandler = null;
     }
     if (mouseGlow) {
         mouseGlow.remove();
         mouseGlow = null;
     }
+    glowInitialized = false;
 }
 
 // ==================== 3D 卡片悬浮效果 ====================
@@ -153,6 +223,9 @@ export function destroyMouseGlow() {
  * @param {string} selector - 卡片选择器
  */
 export function init3DCards(selector = '.article-card') {
+    const profile = getEffectsProfile();
+    if (profile.reducedMotion || profile.saveData) return;
+
     const cards = document.querySelectorAll(selector);
     
     cards.forEach(card => {
@@ -168,29 +241,36 @@ export function init3DCards(selector = '.article-card') {
 
 function handle3DMove(e) {
     const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // 计算旋转角度（最大 10 度）
-    const rotateX = ((y - centerY) / centerY) * -8;
-    const rotateY = ((x - centerX) / centerX) * 8;
-    
-    // 计算光泽位置
-    const glareX = (x / rect.width) * 100;
-    const glareY = (y / rect.height) * 100;
-    
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-    card.style.setProperty('--glare-x', `${glareX}%`);
-    card.style.setProperty('--glare-y', `${glareY}%`);
+    if (card._cardAnimationFrame) {
+        cancelAnimationFrame(card._cardAnimationFrame);
+    }
+
+    card._cardAnimationFrame = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -6;
+        const rotateY = ((x - centerX) / centerX) * 6;
+        const glareX = (x / rect.width) * 100;
+        const glareY = (y / rect.height) * 100;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)`;
+        card.style.setProperty('--glare-x', `${glareX}%`);
+        card.style.setProperty('--glare-y', `${glareY}%`);
+        card._cardAnimationFrame = null;
+    });
 }
 
 function handle3DLeave(e) {
     const card = e.currentTarget;
+    if (card._cardAnimationFrame) {
+        cancelAnimationFrame(card._cardAnimationFrame);
+        card._cardAnimationFrame = null;
+    }
     card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    card.classList.remove('card-3d-active');
 }
 
 function handle3DEnter(e) {
